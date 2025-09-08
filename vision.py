@@ -1,5 +1,5 @@
 import sensor, image, time
-from utils import helpers
+import utils
 
 # Init sensor
 sensor.reset()
@@ -15,7 +15,7 @@ def process_frame():
     clock.tick()
     img = sensor.snapshot()
 
-    low, high, mean_val = helpers.dynamic_threshold(img.get_statistics(), OFFSET)
+    low, high, mean_val = utils.dynamic_threshold(img.get_statistics(), OFFSET)
     thresholds = [(0, low)]  # darker-than-background
 
     blobs = img.find_blobs(thresholds, area_threshold=MIN_AREA, pixels_threshold=MIN_AREA)
@@ -23,7 +23,7 @@ def process_frame():
     nearest = None
     nearest_area = 0
     for b in blobs:
-        if helpers.is_valid_blob(b, MIN_AREA, MAX_AREA):
+        if utils.is_valid_blob(b, MIN_AREA, MAX_AREA):
             area = b.w() * b.h()
             if area > nearest_area:
                 nearest = b
@@ -36,7 +36,7 @@ def process_frame():
         cy = nearest.cy()
         img.draw_rectangle(nearest.rect(), color=127)
         img.draw_cross(cx, cy, color=255)
-        zone = helpers.get_zone(cx, width)
+        zone = utils.get_zone(cx, width)
         info.update({"zone": zone, "area": nearest_area, "brightness": mean_val})
 
     return img, info
