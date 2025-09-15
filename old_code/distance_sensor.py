@@ -69,8 +69,19 @@ while True:
                 target = nearest
 
             if target:
-                # Draw bounding box and mark as nearest object
-                img.draw_rectangle(target.rect(), color=(255, 0, 0), thickness=3)
+                # Find blob contours
+                roi = target.rect()  # region of interest
+                sub = img.copy(roi)   # crop to that blob
+                contours = sub.find_contours(threshold=1000)
+
+                # Draw blob contous
+                for c in contours:
+                    img.draw_polygon(c, roi=roi, color=(0,255,0))
                 img.draw_cross(target.cx(), target.cy(), color=(0, 255, 0))
+
+
+               # Draw bounding box and mark as nearest object
+               #img.draw_rectangle(target.rect(), color=(255, 0, 0), thickness=3)
+
 
 

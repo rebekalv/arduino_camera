@@ -3,8 +3,8 @@ import time
 import network
 import socket
 
-SSID = "REBEKALV 2920"  # Network SSID
-KEY = "}R1277v8"  # Network key
+SSID = "REBEKALV"  # Network SSID
+KEY = "12345678"  # Network key
 HOST = ""  # Use first available interface
 PORT = 8080  # Arbitrary non-privileged port
 
@@ -12,6 +12,9 @@ PORT = 8080  # Arbitrary non-privileged port
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect(SSID, KEY)
+
+print("Scanning WiFi networks...")
+print(wlan.scan())
 
 while not wlan.isconnected():
     print('Trying to connect to "{:s}"...'.format(SSID))
