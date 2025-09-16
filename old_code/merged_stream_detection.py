@@ -1,7 +1,7 @@
 import sensor, image, time, network, socket
 
-SSID = "REBEKALV 2920"
-KEY = "}R1277v8"
+SSID = "REBEKALV"
+KEY = "12345678"
 HOST = ""
 PORT = 8080
 
