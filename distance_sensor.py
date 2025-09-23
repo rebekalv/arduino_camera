@@ -1,7 +1,6 @@
-import sensor, image, time
+import sensor, time
 from machine import I2C
 from vl53l1x import VL53L1X
-from collections import deque
 
 # Enable wifi
 WIFI_STREAMING = False # Set to False to disable wifi streaming
