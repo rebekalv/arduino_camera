@@ -132,6 +132,16 @@ def detect_obstacles(wifi_client=None):
                 img.draw_cross(target.cx(), target.cy(), color=(0, 255, 0))
                 img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
 
+                # Get x-range of the blob, NB: pixels 0-320
+                x_min = target.x()
+                x_max = target.x() + target.w()
+
+                # Combine with distance
+                result = (x_min, x_max, dist)
+
+                # Print to terminal
+                print(result)
+
         if WIFI_STREAMING and wifi_client:
             stream_frame(wifi_client, img)
 

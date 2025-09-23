@@ -8,27 +8,14 @@ Download & install OpenMV IDE
 
 Connect your Nicla Vision via USB.
 
-Open the OpenMV and click connect (Ctrl E, the outlet icon)
+Open the OpenMV and connect the camera by clicking the outlet icon (Ctrl E)
 
 It will prompt you to update firmware → install OpenMV firmware on the Nicla Vision.
 
-Test by running an example (File → Examples → OpenMV → Image Processing).
+Test by running an example. File → Examples → OpenMV → Image Processing.
 
-## 2. Develop in VSCode instead of IDE
+## 2. Multiple files
 
-Install Python extension in VSCode.
+If you want to divide the code in multiple files, you will get include errors.
 
-Install mpremote (for uploading scripts to microcontrollers):
-
-python -m pip install mpremote
-
-
-In VSCode:
-
-Write your .py scripts.
-
-Use mpremote to upload to Nicla Vision:
-
-mpremote connect COM4 fs cp main.py :
-
-(replace com4 with your nicla visions com port)
+To surpass this, you will need to move the files you want to include into the nicla vision USB drive, found in the file explorer. Changing these files is a bit more difficult, but it works.
