@@ -1,6 +1,7 @@
 import sensor, image, time
 from machine import I2C
 from vl53l1x import VL53L1X
+from collections import deque
 
 # Enable wifi
 WIFI_STREAMING = False # Set to False to disable wifi streaming
@@ -11,21 +12,34 @@ sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
 sensor.set_framesize(sensor.QVGA)
 sensor.skip_frames(time=2000)
 
-# ToF (time of flight) setup
+# Distance sensor setup (ToF = time of flight)
 i2c = I2C(2)
 tof = VL53L1X(i2c)
+MIN_VALID_DISTANCE = 40  # mm
 
 clock = time.clock()
 
 # Parameters BLOB DETECTION
 THRESHOLD_TYPE = "dark"  # "dark" or "bright"
-min_area = 200       # ignore tiny blobs
-min_pixels = 200     # ignore tiny blobs
+min_area = 300       # ignore tiny blobs
+min_pixels = 300     # ignore tiny blobs
 OFFSET = 30  # threshold offset around mean brightness
+
+# Buffer (last 5 readings) for smoothing noisy detections
+readings = []
+MAX_READINGS = 10
 
 def wifi_setup():
     import network, socket
-    SSID = "REBEKALV"
+
+    # User instructions
+    print('\n1. Activate a mobile hotspot ')
+    print('2. Set the band to be 2.4 GHz')
+    print('3. Change the wifi name and passkey parameters to match the wifi\n')
+
+
+    # WiFi connection parameters
+    WIFI_NAME = "REBEKALV"
     KEY = "12345678"
     HOST = ""
     PORT = 8080
@@ -33,10 +47,12 @@ def wifi_setup():
     # Init wlan module and connect to network
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    wlan.connect(SSID, KEY)
+    wlan.connect(WIFI_NAME, KEY)
+
+    print('Trying to connect to network "{:s}"'.format(WIFI_NAME))
+    print('with passkey "{:s}"'.format(KEY))
 
     while not wlan.isconnected():
-        print('Trying to connect to "{:s}"...'.format(SSID))
         time.sleep_ms(1000)
 
     print("WiFi Connected ", wlan.ifconfig())
@@ -84,7 +100,6 @@ def detect_obstacles(wifi_client=None):
 
         ## DISTANCE SENSOR
         dist = tof.read()  # Read distance
-        img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5) # Show distance on stream
 
         ## BLOB DETECTION
 
@@ -102,7 +117,7 @@ def detect_obstacles(wifi_client=None):
         # Find dark or light blobs
         blobs = img.find_blobs(thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
 
-        if blobs:
+        if blobs and dist > MIN_VALID_DISTANCE:
             # Center of the image (where ToF points)
             center_x = img.width() // 2
             center_y = img.height() // 2
@@ -128,20 +143,27 @@ def detect_obstacles(wifi_client=None):
                 target = nearest
 
             if target:
-                # Draw target blob
+                # Draw target square and distance
                 img.draw_cross(target.cx(), target.cy(), color=(0, 255, 0))
                 img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
+                img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
 
                 # Get x-range of the blob, NB: pixels 0-320
                 x_min = target.x()
                 x_max = target.x() + target.w()
 
-                # Combine with distance
-                result = (x_min, x_max, dist)
+                # Store in buffer
+                readings.append((x_min,x_max,dist))
 
-                # Print to terminal
-                print(result)
+                # Print the average of the last N readings
+                if len(readings) == MAX_READINGS:
+                    x_min = sum(r[0] for r in readings) // MAX_READINGS
+                    x_max = sum(r[1] for r in readings) // MAX_READINGS
+                    dist = sum(r[2] for r in readings) // MAX_READINGS
+                    print(x_min, x_max, dist)
+                    readings.pop(0)  # remove oldest reading
 
+        ## WIFI STREAMING
         if WIFI_STREAMING and wifi_client:
             stream_frame(wifi_client, img)
 
