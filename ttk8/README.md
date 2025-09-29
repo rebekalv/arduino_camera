@@ -1,6 +1,6 @@
 # TTK8 - Object Detection with an Arduino Nicla Vision Camera
 
-This project uses the OpenMV firmware to implement object detection on the Arduino Nicla Vision camera. It uses the integrated Time of Flight distance sensor (ToF) to measure the distance to the nearest obstacle. The system combines blob detection and wifi streaming to identify and track objects in real-time.
+This project uses the OpenMV firmware to implement object detection on the Arduino Nicla Vision camera. The system combines blob detection with the integrated distance sensor to identify the nearest object. The object gets marked and the video is streamed over wifi to track obstacles in real-time.
 
 ![System Overview](images/system_overview.jpg)
 _Complete system setup showing Nicla Vision camera in operation_
