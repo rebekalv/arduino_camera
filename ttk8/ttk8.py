@@ -3,7 +3,16 @@ from machine import I2C
 from vl53l1x import VL53L1X
 
 # Enable wifi
-WIFI_STREAMING = True # Set to False to disable wifi streaming
+WIFI_STREAMING = False # Set to False to disable wifi streaming
+WIFI_NAME = "ASUS"
+KEY = "oliven23"
+
+# Parameters BLOB DETECTION
+THRESHOLD_TYPE = "dark"  # "dark" or "bright"
+OFFSET = 30  # threshold offset around mean background brightness
+min_area = 300       # ignore tiny blobs
+min_pixels = 300     # ignore tiny blobs
+max_fraction = 0.95   # ignore blobs covering more than 90% of image
 
 # Camera setup
 sensor.reset()
@@ -18,13 +27,6 @@ MIN_VALID_DISTANCE = 40  # mm
 
 clock = time.clock()
 
-# Parameters BLOB DETECTION
-THRESHOLD_TYPE = "dark"  # "dark" or "bright"
-OFFSET = 30  # threshold offset around mean brightness
-min_area = 300       # ignore tiny blobs
-min_pixels = 300     # ignore tiny blobs
-max_fraction = 0.95   # ignore blobs covering more than 90% of image
-
 def wifi_setup():
     import network, socket
 
@@ -33,10 +35,7 @@ def wifi_setup():
     print('2. If not activated: Set the band to be 2.4 GHz')
     print('3. Change the wifi name and passkey parameters to match the wifi\n')
 
-
     # WiFi connection parameters
-    WIFI_NAME = "ASUS"
-    KEY = "oliven23"
     HOST = ""
     PORT = 8080
 
