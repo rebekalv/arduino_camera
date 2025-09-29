@@ -25,10 +25,6 @@ min_area = 300       # ignore tiny blobs
 min_pixels = 300     # ignore tiny blobs
 max_fraction = 0.95   # ignore blobs covering more than 90% of image
 
-# Buffer (last 5 readings) for smoothing noisy detections
-readings = []
-MAX_READINGS = 10
-
 def wifi_setup():
     import network, socket
 
@@ -156,21 +152,6 @@ def detect_obstacles(wifi_client=None):
                 img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
                 img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
 
-                # Get x-range of the blob, NB: pixels 0-320
-                x_min = target.x()
-                x_max = target.x() + target.w()
-
-                # Store in buffer
-                readings.append((x_min,x_max,dist))
-
-                # Print the average of the last N readings
-                if len(readings) == MAX_READINGS:
-                    x_min = sum(r[0] for r in readings) // MAX_READINGS
-                    x_max = sum(r[1] for r in readings) // MAX_READINGS
-                    dist = sum(r[2] for r in readings) // MAX_READINGS
-                    print(x_min, x_max, dist)
-                    readings.pop(0)  # remove oldest reading
-
         ## WIFI STREAMING
         if WIFI_STREAMING and wifi_client:
             stream_frame(wifi_client, img)
@@ -185,3 +166,4 @@ while True:
             detect_obstacles()
     except OSError as e:
         print("socket error:", e)
+
