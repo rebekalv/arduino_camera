@@ -1,11 +1,11 @@
-import sensor, time
+import sensor, time, pyb
 from machine import I2C
 from vl53l1x import VL53L1X
 
 # Enable wifi
 WIFI_STREAMING = True # Set to False to disable wifi streaming
 WIFI_NAME = "ASUS"
-KEY = "oliven23"
+WIFI_KEY = "oliven23"
 
 # Parameters BLOB DETECTION
 THRESHOLD_TYPE = "dark"  # "dark" or "bright"
@@ -29,9 +29,19 @@ MIN_VALID_DISTANCE = 40  # mm
 readings = []
 MAX_READINGS = 10
 
+# LEDs
+red = pyb.LED(1)
+green = pyb.LED(2) # streaming video
+blue = pyb.LED(3)  # setting up stream
+
+def leds_off():
+    red.off()
+    green.off()
+    blue.off()
+
 clock = time.clock()
 
-def wifi_setup():
+def wifi_setup(name, key): # returns wifi client
     import network, socket
 
     # User instructions
@@ -46,12 +56,12 @@ def wifi_setup():
     # Init wlan module and connect to network
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    wlan.connect(WIFI_NAME, KEY)
-    # Sett statisk IP: (IP, netmask, gateway, DNS)
+    wlan.connect(name, key)
+    # Set statisk IP: (IP, netmask, gateway, DNS)
     wlan.ifconfig(('192.168.1.30', '255.255.255.0', '192.168.1.1', '8.8.8.8'))
 
-    print('Trying to connect to network "{:s}"'.format(WIFI_NAME))
-    print('with passkey "{:s}"\n'.format(KEY))
+    print('Trying to connect to network "{:s}"'.format(name))
+    print('with passkey "{:s}"\n'.format(key))
 
     while not wlan.isconnected():
         time.sleep_ms(1000)
@@ -84,7 +94,7 @@ def wifi_setup():
     )
     return client
 
-def stream_frame(client, img):
+def wifi_stream_frame(client, img):
     # Convert to JPEG for streaming
     cframe = img.to_jpeg(quality=35, copy=True)
     header = (
@@ -171,15 +181,16 @@ def detect_obstacles(wifi_client=None):
 
     ## WIFI STREAMING
     if WIFI_STREAMING and wifi_client:
-        stream_frame(wifi_client, img)
+        wifi_stream_frame(wifi_client, img)
 
 try:
-    if WIFI_STREAMING:
-        client = wifi_setup()
-    else:
-        client = None
+    blue.on()
+    wifi_client = (wifi_setup(WIFI_NAME, WIFI_KEY) if WIFI_STREAMING else None)
+    blue.off()
+    green.on()
     while True:
-        detect_obstacles(client)
-except OSError as e:
-    print("socket error:", e)
+        detect_obstacles(wifi_client)
+except:
+    leds_off()
+    print("\nProgram finished\n")
 
