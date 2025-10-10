@@ -1,27 +1,14 @@
-import pyb
+from pyb import UART
+import time
 
-# Setup I2C in SLAVE mode
-i2c = pyb.I2C(1, pyb.I2C.SLAVE, addr=0x12)  # I2C bus 1, address 0x12
+# UART1, 115200 baud, tx=Pin X, rx=Pin Y (adjust to your wiring)
+uart = UART(1, 115200)
 
-# Dummy distance value (replace later with ToF reading)
-distance_cm = 42
-
-print("I2C Slave running on address 0x12")
-
-wait = 0
-
-green = pyb.LED(2)
-green.on()
+distance_cm = 400
 
 while True:
-    try:
-        # Wait for master to request data
-        if i2c.is_ready(0x12):
-            # Send distance (as 1 byte for now)
-            i2c.send(bytes([distance_cm]), timeout=1000)
-            print("Sent:", distance_cm, "cm")
+    # Send data as bytes
+    uart.write(bytes([distance_cm]))  # or send string: uart.write(str(distance_cm) + '\n')
+    time.sleep_ms(100)  # adjust rate
 
-    except Exception:
-        wait = wait +1
-        if wait % 200000 == 0:
-            print("Waiting for master")
+# send one byte -> receive 6 bytes, 2 per number sent.
