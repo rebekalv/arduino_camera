@@ -3,7 +3,7 @@ from machine import I2C
 from vl53l1x import VL53L1X
 
 # Enable wifi
-WIFI_STREAMING = True # Set to False to disable wifi streaming
+WIFI_STREAMING = False # Set to False to disable wifi streaming
 WIFI_NAME = "ASUS"
 WIFI_KEY = "oliven23"
 
