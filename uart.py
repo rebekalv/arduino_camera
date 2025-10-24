@@ -6,8 +6,8 @@ import struct  # for packing integers to bytes
 uart = UART(4, 115200, timeout_char=200)
 
 x_start = 20
-x_end = 30
-distance_cm = 400
+x_end = 310
+distance_cm = 500
 
 green = LED(2)
 green.on()

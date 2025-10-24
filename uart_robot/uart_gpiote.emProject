@@ -65,7 +65,6 @@
       <file file_name="nrfx_prs.c" />
       <file file_name="nrfx_uart.c" />
       <file file_name="nrfx_uarte.c" />
-      <file file_name="nrfx_gpiote.c" />
     </folder>
     <folder Name="Application">
       <file file_name="main.c" />
