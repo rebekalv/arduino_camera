@@ -61,7 +61,6 @@
       <file file_name="nrf_strerror.c" />
     </folder>
     <folder Name="nRF_Drivers">
-      <file file_name="nrf_drv_uart.c" />
       <file file_name="nrfx_atomic.c" />
       <file file_name="nrfx_prs.c" />
       <file file_name="nrfx_uart.c" />

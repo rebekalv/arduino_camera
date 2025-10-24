@@ -1,38 +1,49 @@
+#define UARTE1_PRESENT = 1
 #include <sdk_config.h>
 #include "nrfx.h"     
-#include "nrf_drv_uart.h"
-#include "nrf_delay.h"
+#include "nrfx_uarte.h"
+//#include "nrf_delay.h"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
-#include "nrf_drv_gpiote.h"
-#include "nrf_gpiote.h"
-#include "nrf_gpio.h"
+//#include "nrf_drv_gpiote.h"
+//#include "nrf_gpiote.h"
+//#include "nrf_gpio.h"
 
 // UART
-#define UART_TX_PIN 6   // adjust to your board
-#define UART_RX_PIN 8
-#define UART_BAUDRATE NRF_UART_BAUDRATE_115200
-#define RX_DATA_LENGHT 6
+#define UARTE_TX_PIN 6   // adjust to your board
+#define UARTE_RX_PIN 8
+#define UARTE_BAUDRATE NRF_UARTE_BAUDRATE_115200
+#define RX_DATA_LENGTH 6
 
-static const nrf_drv_uart_t uart = NRF_DRV_UART_INSTANCE(0);
+static const nrfx_uarte_t uarte1 = NRFX_UARTE_INSTANCE(1);
 
 uint8_t gpiote_rx_counter = 0;
 bool rx_data_available = false;
 
-void uart_init(void)
+void uarte1_event_handler(nrfx_uarte_event_t const * p_event, void * p_context)
 {
-    nrf_drv_uart_config_t config = NRF_DRV_UART_DEFAULT_CONFIG;
-    config.pseltxd = UART_TX_PIN;
-    config.pselrxd = UART_RX_PIN;
-    config.baudrate = UART_BAUDRATE;
-    config.hwfc = NRF_UART_HWFC_DISABLED;
+    if (p_event->type == NRFX_UARTE_EVT_RX_DONE)
+    {
+        // handle received data
+    }
+}
 
-    APP_ERROR_CHECK(nrf_drv_uart_init(&uart, &config, NULL));
+void uart1_init(void)
+{
+    nrfx_uarte_config_t  config = NRFX_UARTE_DEFAULT_CONFIG;
+    config.pseltxd = UARTE_TX_PIN;
+    config.pselrxd = UARTE_RX_PIN;
+    config.baudrate = UARTE_BAUDRATE;
+    config.hwfc = NRF_UARTE_HWFC_DISABLED;
 
-    NRF_LOG_INFO("UART initialized");
+    APP_ERROR_CHECK(nrfx_uarte_init(&uarte1, &config, uarte1_event_handler));
+
+    NRF_LOG_INFO("UARTE1 initialized");
     NRF_LOG_FLUSH();
 }
+
+/*
 
 void rx_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
@@ -74,13 +85,18 @@ bool uart_receive_data(uint8_t *camera_data, size_t length)
     return (err == NRF_SUCCESS);
 }
 
+*/
+
 int main(void)
 {
-    system_init();
-    uint8_t camera_data[6];
+    //system_init();
+    //uint8_t camera_data[6];
+
+    uart1_init();
 
     while (true)
     {
+    /*
         uart_request_data();
 
         if(rx_data_available)
@@ -103,6 +119,7 @@ int main(void)
       
         
         nrf_delay_ms(1000);  // request periodically
+        */
     }
 }
 
