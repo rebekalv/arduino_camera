@@ -4,11 +4,10 @@ from vl53l1x import VL53L1X
 
 # Enable wifi
 WIFI_STREAMING = False # Set to False to disable wifi streaming
-WIFI_NAME = "ASUS"
-WIFI_KEY = "oliven23"
+WIFI_NAME = "Volvevegen_2G"
+WIFI_KEY = "Volvevegen"
 
 # Parameters BLOB DETECTION
-THRESHOLD_TYPE = "dark"  # "dark" or "bright"
 OFFSET = 30  # threshold offset around mean background brightness
 min_area = 300       # ignore tiny blobs
 min_pixels = 300     # ignore tiny blobs
@@ -17,13 +16,14 @@ max_fraction = 0.95   # ignore blobs covering more than 90% of image (not workin
 # Camera setup
 sensor.reset()
 sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
-sensor.set_framesize(sensor.QVGA)
-sensor.skip_frames(time=2000)
+sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
+sensor.skip_frames(time=500)
 
 # Distance sensor setup (ToF = time of flight)
 i2c = I2C(2)
 tof = VL53L1X(i2c)
 MIN_VALID_DISTANCE = 40  # mm
+MAX_VALID_DISTANCE = 2000 # mm
 
 # Buffer (last 10 readings) for smoothing noisy detections
 readings = []
@@ -58,16 +58,17 @@ def wifi_setup(name, key): # returns wifi client
     wlan.active(True)
     wlan.connect(name, key)
     # Set statisk IP: (IP, netmask, gateway, DNS)
-    wlan.ifconfig(('192.168.1.30', '255.255.255.0', '192.168.1.1', '8.8.8.8'))
+    #wlan.ifconfig(('192.168.2.30', '255.255.255.0', '192.168.2.1', '8.8.8.8'))
 
     print('Trying to connect to network "{:s}"'.format(name))
     print('with passkey "{:s}"\n'.format(key))
 
     while not wlan.isconnected():
-        time.sleep_ms(1000)
+        time.sleep(1)
+        print("Status:", wlan.status())
 
-    print("WiFi Connected ", wlan.ifconfig())
-    print("Open a browser and enter http://{:s}:{:d}/".format(wlan.ifconfig()[0], PORT))
+    print("WiFi Connected\n")
+    print("Open a browser and enter http://{:s}:{:d}/ \n".format(wlan.ifconfig()[0], PORT))
 
     # Create server socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -117,18 +118,13 @@ def detect_obstacles(wifi_client=None):
     # Dynamic background brightness
     stats = img.get_statistics()
     mean_val = stats.l_mean()
-    if THRESHOLD_TYPE == "dark":
-       limit = max(0, mean_val - OFFSET)
-       thresholds = [(0, limit)]
-    else:
-       limit = min(255, mean_val + OFFSET)
-       thresholds = [(limit, 255)]
-
+    limit = max(0, mean_val - OFFSET)
+    thresholds = [(0, limit)]
 
     # Find dark or light blobs
     blobs = img.find_blobs(thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
 
-    if blobs and dist > MIN_VALID_DISTANCE:
+    if blobs and dist > MIN_VALID_DISTANCE and dist < MAX_VALID_DISTANCE:
         # Center of the image (where ToF points)
         center_x = img.width() // 2
         center_y = img.height() // 2

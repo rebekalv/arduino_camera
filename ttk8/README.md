@@ -1,57 +1,51 @@
-# TTK8 - Object Detection with an Arduino Nicla Vision Camera (Spy Camera)
+# TTK8 - Object Detection with an Arduino Nicla Vision Camera
 
 This project uses the OpenMV firmware to implement object detection on the Arduino Nicla Vision camera. The system combines blob detection with the integrated distance sensor to identify the nearest object. The object gets marked and the video is streamed over wifi to track obstacles in real-time.
 
-**Plot twist:** What started as an innocent object detection project accidentally evolved into a fully functional black-and-white surveillance system! During testing, it was discovered that this works suspiciously well as a home security or spy camera (please use responsibly and with proper consent - privacy matters!). Who knew that "detecting obstacles" could also mean "detecting your roommate eating snacks at 2 AM"?
+![Stream Mug](images/mug_stream.png)
+_Object detection on wifi stream_
 
-![System Overview](images/innerAnalysis.png)
-_Nicla Vision camera system_
+![Nicla vision green](images/green.png)
+_Nicla Vision Streaming Video_
 
-## Prerequisites
 
-### 1. Hardware Requirements
+**Plot twist:** What started as an innocent object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
 
-- [Arduino Pro Nicla Vision](https://store.arduino.cc/products/nicla-vision?srsltid=AfmBOopppHsPMesp0YKIOC7XfsJXBv7hgtYOzXum65FR8MvuUogarmM3)
-- USB micro-b cable for programming and power
-- WiFi network with a 2.4GHz bandwidth for streaming (optional)
-- Computer (windows/linux/mac)
+## Features
 
-![Hardware Setup](images/niclavision.png)
-_Arduino Pro Nicla Vision with USB connection_
-
-### 2. Install OpenMV IDE
-
-Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor3aI8hPW_sCZ0YLRZqzcMkT7fHTG1KMVlt2jVWwqs6_waVNAJy) (Windows/Linux/Mac).
-
-1. Connect your Nicla Vision via USB
-2. Open the OpenMV IDE and connect the camera by clicking the outlet icon (Ctrl+E)
-3. It will prompt you to update firmware → install OpenMV firmware on the Nicla Vision
-4. Test by running an example: File → Examples → OpenMV → Image Processing
-
-## Features & Algorithm
-
-- **Image Capture**: Captures grayscale images at QVGA resolution
-- **Real-time Blob Detection**: Identifies and filters dark/bright objects standing out from the background
+- **Real-time Blob Detection**: Identifies and filters dark objects standing out from the background
 - **Adaptive Thresholding**: Calculates mean background brightness to handle varying lighting conditions
 - **Target Selection & Tracking**: Prioritizes objects in the center of the field of view, where the distance sensor is most accurate. Ignores objects that are too small or too large to reduce false positives
-- **Distance Measurement**: Uses integrated ToF sensor for precise distance readings
 - **Visualization**: Draws box around nearest obstacle and displays distance information on live feed
 - **WiFi Streaming**: Optional live video streaming to web browser for remote monitoring (hence spy camera)
 
 ![Object Detection Demo](images/detection_demo.jpg)
 _Example of object detection with distance measurement overlay_
 
-## Configuration
+## Features & Configuration
 
 ### Camera Settings
 
-- **Format**: Grayscale (optimized for detection)
-- **Resolution**: QVGA (320x240)
+- **Image Capture**: Captures grayscale images at QVGA (320x240) resolution
+
+```python
+sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
+sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
+```
+
+### Distance Sensor
+- **Distance Measurement**: Uses the integrated ToF VL53L1X sensor. Defines a valid range from 40mm to 2000mm.
+
+```python
+MIN_VALID_DISTANCE = 40  # mm
+MAX_VALID_DISTANCE = 2000 # mm
+```
+
 
 ### Detection Parameters
 
 ```python
-THRESHOLD_TYPE = "dark"      # "dark" or "bright" objects
+THRESHOLD_TYPE = "dark"      # "dark" or "light" objects
 OFFSET = 30                  # Threshold offset from mean brightness
 min_area = 300              # Minimum blob area (pixels)
 min_pixels = 300            # Minimum blob pixel count
@@ -73,6 +67,32 @@ This is where the most problems occurred. See [Troubleshooting](#troubleshooting
 
 ![OpenMV IDE Setup](images/openmv_ide_setup.jpg)
 _OpenMV IDE interface with ttk8.py loaded and connected to Nicla Vision_
+
+
+## Prerequisites
+
+### 1. Hardware Requirements
+
+- [Arduino Pro Nicla Vision](https://store.arduino.cc/products/nicla-vision?srsltid=AfmBOopppHsPMesp0YKIOC7XfsJXBv7hgtYOzXum65FR8MvuUogarmM3)
+- USB micro-b cable for programming and power
+- WiFi network with a 2.4GHz bandwidth for streaming
+- Computer (windows/linux/mac)
+
+![Hardware Setup](images/niclavision.png)
+_Arduino Pro Nicla Vision_
+
+### 2. Install OpenMV IDE
+
+Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor3aI8hPW_sCZ0YLRZqzcMkT7fHTG1KMVlt2jVWwqs6_waVNAJy) (Windows/Linux/Mac).
+
+1. Connect your Nicla Vision via USB to your computer
+2. Open the OpenMV IDE and connect the camera by clicking the outlet icon (Ctrl+E). The play button turns green when connected.
+
+![Not connected](images/not_connected.png)
+![Connected](images/connected.png)
+
+3. It will prompt you to update firmware → install OpenMV firmware on the Nicla Vision
+4. Test by running an example: File → Examples → OpenMV → Image Processing
 
 ## How to Run
 
@@ -101,11 +121,12 @@ _Visual representation of the detection algorithm workflow_
 #### Troubleshooting
 
 1. Test [with wifi streaming](#with-wifi-streaming), while having the camera connected to the computer. Then you can see the terminal output in OpenMV and use it for debugging.
-2. Check that your network supports the 2.4 GHz band.
-   On mac: Option + click on wifi icon. Check the network bandwidths under `Channel`.
+1. Check that your network supports the 2.4 GHz band.
+   On mac: Option + click on wifi icon. Check the network bandwidth under "Channel".
    On windows: Open Settings → Network & Internet → Wi-Fi. Click on your current network name and look for network band.
-3. If your network does not support the 2.4 GHz band, a solution is to connect your computer to ethernet, and enable its mobile hotspot (selecting the 2.4 GHz band).
-4. If your browser blocks the HTTP stream (showing "Not Secure" warning), click "Advanced" on the security warning and select "Proceed to [IP address] (unsafe)". Your browser might have further restrictions, denying you access.
+1. If your network does not support the 2.4 GHz band, the easiest solution is to go to your router ip and enable a 2G network. To find the router ip, run `arp -a` in the mac terminal. One of the ips listed will be you router. Open a browser and go to the router ip. Check your physical router box for the password. Then you can enable a 2G network with WPA2 encryption.
+1. Another solution is to connect your computer to ethernet, and enable a mobile hotspot (selecting the 2.4 GHz band).
+1. If your browser blocks the HTTP stream (showing "Not Secure" warning), click "Advanced" on the security warning and select "Proceed to [IP address] (unsafe)". Your browser might have further restrictions, denying you access.
 
 ## Results and Examples
 
