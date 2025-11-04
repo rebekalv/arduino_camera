@@ -106,23 +106,48 @@ def wifi_stream_frame(client, img):
     client.sendall(header)
     client.sendall(cframe)
 
+def average_object_width_mm(target,center_x,dist):
+
+    # Get x-range of the blob, NB: pixels 0-320
+    x_min = target.x()
+    x_max = target.x() + target.w()
+
+    # Store in buffer
+    readings.append((x_min,x_max,dist))
+
+    # Find average of the last N readings
+    if len(readings) == MAX_READINGS:
+        x_min = sum(r[0] for r in readings) // MAX_READINGS
+        x_max = sum(r[1] for r in readings) // MAX_READINGS
+        dist = sum(r[2] for r in readings) // MAX_READINGS
+        readings.pop(0)  # remove oldest reading
+
+    # Convert from pixel to mm
+    focal_length_px = 143.0  # for QVGA
+    width_px = x_max - x_min
+    object_width_mm = (width_px * dist) / focal_length_px
+
+    # offset from image center to x_start in mm (negative = left)
+    x_offset_mm = ((x_min - center_x) * dist) / focal_length_px
+
+    return int(x_offset_mm),int(object_width_mm),int(dist)
+
+
 def detect_obstacles(wifi_client=None):
     clock.tick()
     img = sensor.snapshot()
 
     ## DISTANCE SENSOR
-    dist = tof.read()  # Read distance
-
-    ## BLOB DETECTION
+    dist = tof.read()  # Read distance in mm
 
     # Dynamic background brightness
     stats = img.get_statistics()
     mean_val = stats.l_mean()
     limit = max(0, mean_val - OFFSET)
-    thresholds = [(0, limit)]
+    color_thresholds = [(0, limit)]
 
-    # Find dark or light blobs
-    blobs = img.find_blobs(thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
+    # Find dark blobs
+    blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
 
     if blobs and dist > MIN_VALID_DISTANCE and dist < MAX_VALID_DISTANCE:
         # Center of the image (where ToF points)
@@ -160,20 +185,9 @@ def detect_obstacles(wifi_client=None):
             img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
             img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
 
-            # Get x-range of the blob, NB: pixels 0-320
-            x_min = target.x()
-            x_max = target.x() + target.w()
-
-            # Store in buffer
-            readings.append((x_min,x_max,dist))
-
-            # Print the average of the last N readings
-            if len(readings) == MAX_READINGS:
-                x_min = sum(r[0] for r in readings) // MAX_READINGS
-                x_max = sum(r[1] for r in readings) // MAX_READINGS
-                dist = sum(r[2] for r in readings) // MAX_READINGS
-                print(x_min, x_max, dist)
-                readings.pop(0)  # remove oldest reading
+            # Calculate average object offset, width and distance
+            x_offset_mm,object_width_mm,smoothed_dist = average_object_width_mm(target,center_x,dist)
+            print(x_offset_mm,object_width_mm,smoothed_dist)
 
     ## WIFI STREAMING
     if WIFI_STREAMING and wifi_client:
@@ -184,6 +198,7 @@ try:
     wifi_client = (wifi_setup(WIFI_NAME, WIFI_KEY) if WIFI_STREAMING else None)
     blue.off()
     green.on()
+    print("Offset mm, Object width mm, Distance mm")
     while True:
         detect_obstacles(wifi_client)
 except:

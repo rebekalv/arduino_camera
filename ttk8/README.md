@@ -8,23 +8,12 @@ _Object detection on wifi stream_
 ![Nicla vision green](images/green.png)
 _Nicla Vision Streaming Video_
 
-
 **Plot twist:** What started as an innocent object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
-
-## Features
-
-- **Real-time Blob Detection**: Identifies and filters dark objects standing out from the background
-- **Adaptive Thresholding**: Calculates mean background brightness to handle varying lighting conditions
-- **Target Selection & Tracking**: Prioritizes objects in the center of the field of view, where the distance sensor is most accurate. Ignores objects that are too small or too large to reduce false positives
-- **Visualization**: Draws box around nearest obstacle and displays distance information on live feed
-- **WiFi Streaming**: Optional live video streaming to web browser for remote monitoring (hence spy camera)
-
-![Object Detection Demo](images/detection_demo.jpg)
-_Example of object detection with distance measurement overlay_
 
 ## Features & Configuration
 
-### Camera Settings
+![Nicla vision analysis](diagrams/innerAnalysis.png)
+_How the detection system works_
 
 - **Image Capture**: Captures grayscale images at QVGA (320x240) resolution
 
@@ -33,7 +22,6 @@ sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
 sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
 ```
 
-### Distance Sensor
 - **Distance Measurement**: Uses the integrated ToF VL53L1X sensor. Defines a valid range from 40mm to 2000mm.
 
 ```python
@@ -41,17 +29,17 @@ MIN_VALID_DISTANCE = 40  # mm
 MAX_VALID_DISTANCE = 2000 # mm
 ```
 
-
-### Detection Parameters
+- **Real-time Blob Detection**: Identifies dark objects (blobs) standing out from the background. The `color_threasholds` are recalculated at every capture based on the average background brightness to handle varying lighting conditions.
 
 ```python
-THRESHOLD_TYPE = "dark"      # "dark" or "light" objects
-OFFSET = 30                  # Threshold offset from mean brightness
-min_area = 300              # Minimum blob area (pixels)
-min_pixels = 300            # Minimum blob pixel count
-max_fraction = 0.95         # Maximum blob size (95% of image)
-MIN_VALID_DISTANCE = 40     # Minimum valid ToF reading (mm)
+# Find dark blobs
+blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
+
 ```
+
+- **Target Selection & Tracking**: Prioritizes blobs nearest the distance sensor's line-of-sight (center), where the sensor most accurate. Ignores objects that are too small or too large to reduce false positives.
+
+- **Visualization**: Draws box around nearest obstacle and displays distance information on live feed
 
 ### WiFi Configuration
 
@@ -60,14 +48,10 @@ To enable WiFi streaming, modify these parameters in `ttk8.py` and ensure your w
 ```python
 ENABLE_WIFI_STREAMING = True # Or False to disable wifi streaming
 WIFI_NAME = "your_network_name"
-KEY = "your_password"
+WIFI_KEY = "your_password"
 ```
 
 This is where the most problems occurred. See [Troubleshooting](#troubleshooting) for solutions.
-
-![OpenMV IDE Setup](images/openmv_ide_setup.jpg)
-_OpenMV IDE interface with ttk8.py loaded and connected to Nicla Vision_
-
 
 ## Prerequisites
 
@@ -92,33 +76,36 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 ![Connected](images/connected.png)
 
 3. It will prompt you to update firmware → install OpenMV firmware on the Nicla Vision
-4. Test by running an example: File → Examples → OpenMV → Image Processing
+4. Test by running an example: File → Examples → OpenMV → HelloWorld
 
 ## How to Run
 
 ### Without Wifi Streaming
 
-1. Open `ttk8.py` in OpenMV IDE and set 'ENABLE_WIFI_STREAMING' to False.
-2. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (outlet icon) and hit play - it will automatically start object detection
+1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING` to False.
+2. Connect your Nicla Vision to the computer with a USB cable and hit play - it automatically starts object detection and the led turns green. The stream is shown in OpenMV.
+
+![Connected pc green](images/connected_pc_green.png)
+![Open mv stream](images/mug_stream.png)
 
 ### With wifi streaming
 
 1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING` to True.
-2. Configure the WiFi parameters (`WIFI_NAME` and `KEY`) as described in the [WiFi Configuration](#wifi-configuration) section. Make sure your WiFi supports 2.4 GHz band.
-3. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (outlet icon) and hit play - it will tell you to open a browser and access the stream at http://192.168.1.30:8080/
-4. When the stream works, upload the code to the Nicla Vision by selecting Tools->Save open script to OpenMV Cam
-5. Disconnect the camera from the computer and connect it to a power source
-   - The camera will automatically connect to the specified network
-   - Open a browser and navigate to the stream http://192.168.1.30:8080/ The stream does not start unless a browser is opened.
+1. Configure the WiFi parameters (`WIFI_NAME` and `WIFI_KEY`) as described in the [WiFi Configuration](#wifi-configuration) section. Make sure your WiFi supports 2.4 GHz band.
+1. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (outlet icon) and hit play. The light turns blue during the network setup.
+   ![Blue setup](images/connected_pc.png)
+1. The output in the terminal will tell you to open a browser and access the stream at a certain ip and port. When this is done, the stream starts and the light turns green.
+   ![Terminal](images/terminal.png)
+   ![Browser stream](images/browser_stream.png)
+1. When the stream works, upload the code to the Nicla Vision. This is done in OpenMV by selecting Tools->Save open script to OpenMV Cam
+   ![Save script](images/save_script.png)
+1. Disconnect the camera from the computer and connect it to a power source. This can be an outlet or a battery connected to the nicla vision power pins.
+   - The camera will automatically connect to the specified network and the light is blue.
+   - Open a browser and navigate to the stream, the light turns green when streaming. The stream does not start untill a browser is opened.
+     ![Green wall](images/connected_wall.png)
    - View the live stream with obstacle detection.
 
-![WiFi Stream Example](images/wifi_stream_browser.jpg)
-_Live video stream in web browser showing real-time object detection_
-
-![Algorithm Flowchart](images/algorithm_flowchart.jpg)
-_Visual representation of the detection algorithm workflow_
-
-#### Troubleshooting
+#### Troubleshooting Wifi Connection
 
 1. Test [with wifi streaming](#with-wifi-streaming), while having the camera connected to the computer. Then you can see the terminal output in OpenMV and use it for debugging.
 1. Check that your network supports the 2.4 GHz band.
@@ -130,24 +117,52 @@ _Visual representation of the detection algorithm workflow_
 
 ## Results and Examples
 
+Lagging, lighter objects not working, lighting matters, darker object behind will be seen as closest even if its not.
+
 ### Detection Performance
 
-![Dark Object Detection](images/dark_object_detection.jpg)
+#### Dark Object Detection
+
+**Current Status**: Working
+
+Selects the object closest to the center of the image, where the distance sensor is the most accurate.
+
+![Dark Object Detection](images/detect_plant.png)
 _Dark object detection with distance measurement_
 
-![Bright Object Detection](images/bright_object_detection.jpg)
+#### Bright Object Detection
+
+**Current Status**: Not supported. Not working.
+
+**Issue**: The system only detects dark objects. In the example image, light-colored glasses are placed in front of a dark chair, but the algorithm incorrectly identifies the chair as the closest obstacle because:
+
+- It prioritizes dark objects over bright ones
+- The chair is closer than the dark plant to the image center (where the distance sensor is most accurate)
+
+**Design Decision**: Earlier code versions included a toggle between dark and bright object detection. However, bright object detection frequently misidentified walls, windows, and background elements as targets instead of actual objects of interest. To improve reliability, the feature was removed and the system now focuses exclusively on dark object detection.
+
+![Bright Object Detection](images/chair_glass.png)
 _Bright object detection example_
 
-![Multiple Objects](images/multiple_objects_detection.jpg)
+#### Multiple Objects
+
+**Current Status**: Works sometimes
+
+
+
+<video width="320" controls>
+  <source src="images/multiple_objects_video.mov" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+_Live video demonstration of multiple object detection_
+
+![Multiple Objects](images/multiple_objects.png)
 _Handling multiple objects in the field of view_
 
-### Different Lighting Conditions
+![Multiple Objects](images/chair_cup.png)
+_Handling multiple objects in the field of view_
 
-![Low Light Performance](images/low_light_detection.jpg)
-_Object detection in low light conditions_
-
-![Bright Light Performance](images/bright_light_detection.jpg)
-_Object detection under bright lighting_
 
 ### Distance Measurement Accuracy
 
@@ -160,8 +175,12 @@ _Close range object detection (minimum 40mm)_
 ![Far Range Detection](images/far_range_detection.jpg)
 _Long range object detection capabilities_
 
-## Multiple Files
+## Tips n Tricks
 
 If you want to divide the code into multiple files using OpenMV, you will get include errors.
 
 To surpass this, you will need to move the files you want to include directly onto the Nicla Vision camera's internal storage drive (not your computer's drive). When the camera is connected via USB, it appears as a separate USB drive in your file explorer - copy the Python files you want include there.
+
+## Future Work
+
+![](diagrams/kontekstDiagram.png)
