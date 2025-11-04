@@ -1,6 +1,5 @@
+import time, struct
 from pyb import UART, LED
-import time
-import struct  # for packing integers to bytes
 
 # UART4, 115200 baud. Tx = pin1 (SDA i2c), Rx = pin2 (SCL i2c)
 uart = UART(4, 115200, timeout_char=200)

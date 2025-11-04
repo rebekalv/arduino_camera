@@ -1,13 +1,12 @@
 # Obstacle Detection - By: Rebekka Alve - Tue Nov 4 2025
 
-import sensor, time, pyb
+import sensor, time, struct
+from pyb import UART, LED
 from machine import I2C
 from vl53l1x import VL53L1X
 
-# Enable wifi
-WIFI_STREAMING = False # Set to False to disable wifi streaming
-WIFI_NAME = "Volvevegen_2G"
-WIFI_KEY = "Volvevegen"
+# Enable UART4, Tx = pin1 (SDA i2c), Rx = pin2 (SCL i2c)
+uart = UART(4, 115200, timeout_char=200)
 
 # Parameters BLOB DETECTION
 OFFSET = 30  # threshold offset around mean background brightness
@@ -21,6 +20,15 @@ sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
 sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
 sensor.skip_frames(time=500)
 
+# Camera specifications
+pixel_size_mm = 1.75e-3
+sensor_px_width = 1616      # active pixel array width
+image_px_width  = 320       # QVGA capture width
+f_mm = 2.2                  # focal length in mm
+
+sensor_width_mm = pixel_size_mm * sensor_px_width
+focal_length_px = int((f_mm * image_px_width) / sensor_width_mm) # approx 249
+
 # Distance sensor setup (ToF = time of flight)
 i2c = I2C(2)
 tof = VL53L1X(i2c)
@@ -32,9 +40,9 @@ readings = []
 MAX_READINGS = 10
 
 # LEDs
-red = pyb.LED(1)
-green = pyb.LED(2) # streaming video
-blue = pyb.LED(3)  # setting up stream
+red = LED(1)
+green = LED(2) # streaming video
+blue = LED(3)  # setting up stream
 
 def leds_off():
     red.off()
@@ -43,72 +51,15 @@ def leds_off():
 
 clock = time.clock()
 
-def wifi_setup(name, key): # returns wifi client
-    import network, socket
+def uart_request():
+    if uart.any():
+        request = uart.read(1)
+        print('Request:', request)
+        if request == b'r':
+            return True
+    return False
 
-    # User instructions
-    print('\n1. Activate a mobile hotspot or use wifi router')
-    print('2. If not activated: Set the band to be 2.4 GHz')
-    print('3. Change the wifi name and passkey parameters to match the wifi\n')
-
-    # WiFi connection parameters
-    HOST = ""
-    PORT = 8080
-
-    # Init wlan module and connect to network
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(name, key)
-    # Set statisk IP: (IP, netmask, gateway, DNS)
-    #wlan.ifconfig(('192.168.2.30', '255.255.255.0', '192.168.2.1', '8.8.8.8'))
-
-    print('Trying to connect to network "{:s}"'.format(name))
-    print('with passkey "{:s}"\n'.format(key))
-
-    while not wlan.isconnected():
-        time.sleep(1)
-        print("Status:", wlan.status())
-
-    print("WiFi Connected\n")
-    print("Open a browser and enter http://{:s}:{:d}/ \n".format(wlan.ifconfig()[0], PORT))
-
-    # Create server socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-    s.bind([HOST, PORT])
-    s.listen(5)
-    s.setblocking(True)
-
-    print("Waiting for user connection...")
-    client, addr = s.accept()
-    client.settimeout(5.0)
-    print("Connected to " + addr[0] + ":" + str(addr[1]))
-
-    # Read request from client
-    data = client.recv(1024)
-
-    # Send multipart header
-    client.sendall(
-        "HTTP/1.1 200 OK\r\n"
-        "Server: OpenMV\r\n"
-        "Content-Type: multipart/x-mixed-replace;boundary=openmv\r\n"
-        "Cache-Control: no-cache\r\n"
-        "Pragma: no-cache\r\n\r\n"
-    )
-    return client
-
-def wifi_stream_frame(client, img):
-    # Convert to JPEG for streaming
-    cframe = img.to_jpeg(quality=35, copy=True)
-    header = (
-        "\r\n--openmv\r\n"
-        "Content-Type: image/jpeg\r\n"
-        "Content-Length:" + str(cframe.size()) + "\r\n\r\n"
-    )
-    client.sendall(header)
-    client.sendall(cframe)
-
-def average_object_width_mm(target,center_x,dist):
+def average_offset_width_distance_mm(target,center_x,dist):
 
     # Get x-range of the blob, NB: pixels 0-320
     x_min = target.x()
@@ -125,7 +76,6 @@ def average_object_width_mm(target,center_x,dist):
         readings.pop(0)  # remove oldest reading
 
     # Convert from pixel to mm
-    focal_length_px = 143.0  # for QVGA
     width_px = x_max - x_min
     object_width_mm = (width_px * dist) / focal_length_px
 
@@ -135,7 +85,7 @@ def average_object_width_mm(target,center_x,dist):
     return int(x_offset_mm),int(object_width_mm),int(dist)
 
 
-def detect_obstacles(wifi_client=None):
+def detect_obstacles():
     clock.tick()
     img = sensor.snapshot()
 
@@ -188,21 +138,21 @@ def detect_obstacles(wifi_client=None):
             img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
 
             # Calculate average object offset, width and distance
-            x_offset_mm,object_width_mm,smoothed_dist = average_object_width_mm(target,center_x,dist)
-            print(x_offset_mm,object_width_mm,smoothed_dist)
-
-    ## WIFI STREAMING
-    if WIFI_STREAMING and wifi_client:
-        wifi_stream_frame(wifi_client, img)
+            return average_offset_width_distance_mm(target,center_x,dist)
+    return 0,0,0
 
 try:
-    blue.on()
-    wifi_client = (wifi_setup(WIFI_NAME, WIFI_KEY) if WIFI_STREAMING else None)
-    blue.off()
     green.on()
-    print("Offset mm, Object width mm, Distance mm")
+    print("focal length px:", focal_length_px)
+    print("x offset mm, width mm, distance mm")
     while True:
-        detect_obstacles(wifi_client)
+        data = struct.pack('<hhh', *detect_obstacles()) # 2 bytes each
+        print(*struct.unpack('<hhh', data)) # print values, for testing
+        if(uart_request()):
+            uart.write(data)
+            print('Data sent')
+        time.sleep_ms(100)
+
 except:
     leds_off()
     print("\nProgram finished\n")
