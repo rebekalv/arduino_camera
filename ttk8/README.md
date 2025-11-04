@@ -109,6 +109,7 @@ This is where the most problems occurred. See [Troubleshooting](#troubleshooting
    - The camera will automatically connect to the specified network and the light is blue.
    - Open a browser and navigate to the stream, the light turns green when streaming. The stream does not start untill a browser is opened.
    - View the live stream with obstacle detection.
+   
      <img src="images/connected_wall.png" width="300" alt="Green wall">
 
 #### Troubleshooting Wifi Connection
