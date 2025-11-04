@@ -64,8 +64,8 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 1. Connect your Nicla Vision via USB to your computer
 2. Open the OpenMV IDE and connect the camera by clicking the outlet icon (Ctrl+E). The play button turns green when connected.
 
-<img src="images/not_connected.png" width="300" alt="Not connected">
-<img src="images/connected.png" width="300" alt="Connected">
+![Not connected](images/not_connected.png)
+![Connected](images/connected.png)
 
 3. It will prompt you to update firmware → install OpenMV firmware on the Nicla Vision
 4. Test by running an example: File → Examples → OpenMV → HelloWorld
@@ -77,7 +77,7 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING` to False.
 2. Connect your Nicla Vision to the computer with a USB cable and hit play - it automatically starts object detection and the led turns green. The stream is shown in OpenMV.
 
-<img src="images/connected_pc_green.png" width="300" alt="Connected pc green">
+<img src="images/connected_pc_green.png" width="400" alt="Connected pc green">
 <img src="images/mug_stream.png" width="400" alt="Open mv stream">
 
 ### With wifi streaming
@@ -93,17 +93,23 @@ WIFI_KEY = "your_password"
 This is where the most problems occurred. See [Troubleshooting](#troubleshooting) for solutions.
 
 2. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (outlet icon) and hit play. The light turns blue during the network setup.
-   <img src="images/connected_pc.png" width="300" alt="Blue setup">
+
+<img src="images/connected_pc.png" width="500" alt="Blue setup">
+
 1. The output in the terminal will tell you to open a browser and access the stream at a certain ip and port. When this is done, the stream starts and the light turns green.
-   <img src="images/terminal.png" width="500" alt="Terminal">
-   <img src="images/browser_stream.png" width="500" alt="Browser stream">
+
+<img src="images/terminal.png" width="500" alt="Terminal">
+<img src="images/browser_stream.png" width="500" alt="Browser stream">
+
 1. When the stream works, upload the code to the Nicla Vision. This is done in OpenMV by selecting Tools->Save open script to OpenMV Cam
-   <img src="images/save_script.png" width="400" alt="Save script">
+
+<img src="images/save_script.png" width="400" alt="Save script">
+
 1. Disconnect the camera from the computer and connect it to a power source. This can be an outlet or a battery connected to the nicla vision power pins.
    - The camera will automatically connect to the specified network and the light is blue.
    - Open a browser and navigate to the stream, the light turns green when streaming. The stream does not start untill a browser is opened.
-     <img src="images/connected_wall.png" width="300" alt="Green wall">
    - View the live stream with obstacle detection.
+   <img src="images/connected_wall.png" width="300" alt="Green wall">
 
 #### Troubleshooting Wifi Connection
 
