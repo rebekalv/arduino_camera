@@ -41,17 +41,7 @@ blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_thres
 
 - **Visualization**: Draws box around nearest obstacle and displays distance information on live feed
 
-### WiFi Configuration
 
-To enable WiFi streaming, modify these parameters in `ttk8.py` and ensure your wifi supports the 2.4 GHz band:
-
-```python
-ENABLE_WIFI_STREAMING = True # Or False to disable wifi streaming
-WIFI_NAME = "your_network_name"
-WIFI_KEY = "your_password"
-```
-
-This is where the most problems occurred. See [Troubleshooting](#troubleshooting) for solutions.
 
 ## Prerequisites
 
@@ -90,9 +80,17 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 
 ### With wifi streaming
 
-1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING` to True.
-1. Configure the WiFi parameters (`WIFI_NAME` and `WIFI_KEY`) as described in the [WiFi Configuration](#wifi-configuration) section. Make sure your WiFi supports 2.4 GHz band.
-1. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (outlet icon) and hit play. The light turns blue during the network setup.
+1. Open `ttk8.py` in OpenMV IDE and modify these parameters. Ensure your wifi supports the 2.4 GHz band:
+
+```python
+ENABLE_WIFI_STREAMING = True # Or False to disable wifi streaming
+WIFI_NAME = "your_network_name"
+WIFI_KEY = "your_password"
+```
+
+This is where the most problems occurred. See [Troubleshooting](#troubleshooting) for solutions.
+
+2. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (outlet icon) and hit play. The light turns blue during the network setup.
    ![Blue setup](images/connected_pc.png)
 1. The output in the terminal will tell you to open a browser and access the stream at a certain ip and port. When this is done, the stream starts and the light turns green.
    ![Terminal](images/terminal.png)
