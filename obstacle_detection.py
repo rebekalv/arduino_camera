@@ -1,9 +1,11 @@
+# Obstacle Detection - By: Rebekka Alve - Tue Nov 4 2025
+
 import sensor, time, pyb
 from machine import I2C
 from vl53l1x import VL53L1X
 
 # Enable wifi
-WIFI_STREAMING = True # Set to False to disable wifi streaming
+WIFI_STREAMING = False # Set to False to disable wifi streaming
 WIFI_NAME = "Volvevegen_2G"
 WIFI_KEY = "Volvevegen"
 
@@ -24,6 +26,10 @@ i2c = I2C(2)
 tof = VL53L1X(i2c)
 MIN_VALID_DISTANCE = 40  # mm
 MAX_VALID_DISTANCE = 2000 # mm
+
+# Buffer (last 10 readings) for smoothing noisy detections
+readings = []
+MAX_READINGS = 10
 
 # LEDs
 red = pyb.LED(1)
@@ -102,6 +108,33 @@ def wifi_stream_frame(client, img):
     client.sendall(header)
     client.sendall(cframe)
 
+def average_object_width_mm(target,center_x,dist):
+
+    # Get x-range of the blob, NB: pixels 0-320
+    x_min = target.x()
+    x_max = target.x() + target.w()
+
+    # Store in buffer
+    readings.append((x_min,x_max,dist))
+
+    # Find average of the last N readings
+    if len(readings) == MAX_READINGS:
+        x_min = sum(r[0] for r in readings) // MAX_READINGS
+        x_max = sum(r[1] for r in readings) // MAX_READINGS
+        dist = sum(r[2] for r in readings) // MAX_READINGS
+        readings.pop(0)  # remove oldest reading
+
+    # Convert from pixel to mm
+    focal_length_px = 143.0  # for QVGA
+    width_px = x_max - x_min
+    object_width_mm = (width_px * dist) / focal_length_px
+
+    # offset from image center to x_start in mm (negative = left)
+    x_offset_mm = ((x_min - center_x) * dist) / focal_length_px
+
+    return int(x_offset_mm),int(object_width_mm),int(dist)
+
+
 def detect_obstacles(wifi_client=None):
     clock.tick()
     img = sensor.snapshot()
@@ -153,6 +186,10 @@ def detect_obstacles(wifi_client=None):
             img.draw_cross(target.cx(), target.cy(), color=(0, 255, 0))
             img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
             img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
+
+            # Calculate average object offset, width and distance
+            x_offset_mm,object_width_mm,smoothed_dist = average_object_width_mm(target,center_x,dist)
+            print(x_offset_mm,object_width_mm,smoothed_dist)
 
     ## WIFI STREAMING
     if WIFI_STREAMING and wifi_client:

@@ -124,10 +124,9 @@ This is where the most problems occurred. See [Troubleshooting](#troubleshooting
 1. If your browser blocks the HTTP stream (showing "Not Secure" warning), click "Advanced" on the security warning and select "Proceed to [IP address] (unsafe)". Your browser might have further restrictions, denying you access.
 
 ## Results and Examples
+Object detection, distance accuracy and wifi stream performance.
 
-Lagging, lighter objects not working, lighting matters, darker object behind will be seen as closest even if its not.
-
-### Detection Performance
+### Object detection Performance
 
 #### Dark Object Detection
 
