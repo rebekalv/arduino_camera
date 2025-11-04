@@ -2,17 +2,20 @@
 
 This project uses the OpenMV firmware to implement object detection on the Arduino Nicla Vision camera. The system combines blob detection with the integrated distance sensor to identify the nearest object. The object gets marked and the video is streamed over wifi to track obstacles in real-time.
 
-![Stream Mug](images/mug_stream.png)
+<img src="images/mug_stream.png" width="400" alt="Stream Mug">
+
 _Object detection on wifi stream_
 
-![Nicla vision green](images/green.png)
+<img src="images/green.png" width="400" alt="Nicla vision green">
+
 _Nicla Vision Streaming Video_
 
 **Plot twist:** What started as an innocent object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
 
 ## Features & Configuration
 
-![Nicla vision analysis](diagrams/innerAnalysis.png)
+<img src="diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
+
 _How the detection system works_
 
 - **Image Capture**: Captures grayscale images at QVGA (320x240) resolution
@@ -41,8 +44,6 @@ blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_thres
 
 - **Visualization**: Draws box around nearest obstacle and displays distance information on live feed
 
-
-
 ## Prerequisites
 
 ### 1. Hardware Requirements
@@ -52,7 +53,8 @@ blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_thres
 - WiFi network with a 2.4GHz bandwidth for streaming
 - Computer (windows/linux/mac)
 
-![Hardware Setup](images/niclavision.png)
+<img src="images/niclavision.png" width="400" alt="Hardware Setup">
+
 _Arduino Pro Nicla Vision_
 
 ### 2. Install OpenMV IDE
@@ -62,8 +64,8 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 1. Connect your Nicla Vision via USB to your computer
 2. Open the OpenMV IDE and connect the camera by clicking the outlet icon (Ctrl+E). The play button turns green when connected.
 
-![Not connected](images/not_connected.png)
-![Connected](images/connected.png)
+<img src="images/not_connected.png" width="300" alt="Not connected">
+<img src="images/connected.png" width="300" alt="Connected">
 
 3. It will prompt you to update firmware → install OpenMV firmware on the Nicla Vision
 4. Test by running an example: File → Examples → OpenMV → HelloWorld
@@ -75,8 +77,8 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING` to False.
 2. Connect your Nicla Vision to the computer with a USB cable and hit play - it automatically starts object detection and the led turns green. The stream is shown in OpenMV.
 
-![Connected pc green](images/connected_pc_green.png)
-![Open mv stream](images/mug_stream.png)
+<img src="images/connected_pc_green.png" width="300" alt="Connected pc green">
+<img src="images/mug_stream.png" width="400" alt="Open mv stream">
 
 ### With wifi streaming
 
@@ -91,16 +93,16 @@ WIFI_KEY = "your_password"
 This is where the most problems occurred. See [Troubleshooting](#troubleshooting) for solutions.
 
 2. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (outlet icon) and hit play. The light turns blue during the network setup.
-   ![Blue setup](images/connected_pc.png)
+   <img src="images/connected_pc.png" width="300" alt="Blue setup">
 1. The output in the terminal will tell you to open a browser and access the stream at a certain ip and port. When this is done, the stream starts and the light turns green.
-   ![Terminal](images/terminal.png)
-   ![Browser stream](images/browser_stream.png)
+   <img src="images/terminal.png" width="500" alt="Terminal">
+   <img src="images/browser_stream.png" width="500" alt="Browser stream">
 1. When the stream works, upload the code to the Nicla Vision. This is done in OpenMV by selecting Tools->Save open script to OpenMV Cam
-   ![Save script](images/save_script.png)
+   <img src="images/save_script.png" width="400" alt="Save script">
 1. Disconnect the camera from the computer and connect it to a power source. This can be an outlet or a battery connected to the nicla vision power pins.
    - The camera will automatically connect to the specified network and the light is blue.
    - Open a browser and navigate to the stream, the light turns green when streaming. The stream does not start untill a browser is opened.
-     ![Green wall](images/connected_wall.png)
+     <img src="images/connected_wall.png" width="300" alt="Green wall">
    - View the live stream with obstacle detection.
 
 #### Troubleshooting Wifi Connection
@@ -125,7 +127,8 @@ Lagging, lighter objects not working, lighting matters, darker object behind wil
 
 Selects the object closest to the center of the image, where the distance sensor is the most accurate.
 
-![Dark Object Detection](images/detect_plant.png)
+<img src="images/detect_plant.png" width="400" alt="Dark Object Detection">
+
 _Dark object detection with distance measurement_
 
 #### Bright Object Detection
@@ -139,14 +142,13 @@ _Dark object detection with distance measurement_
 
 **Design Decision**: Earlier code versions included a toggle between dark and bright object detection. However, bright object detection frequently misidentified walls, windows, and background elements as targets instead of actual objects of interest. To improve reliability, the feature was removed and the system now focuses exclusively on dark object detection.
 
-![Bright Object Detection](images/chair_glass.png)
+<img src="images/chair_glass.png" width="400" alt="Bright Object Detection">
+
 _Bright object detection example_
 
 #### Multiple Objects
 
 **Current Status**: Works sometimes
-
-
 
 <video width="320" controls>
   <source src="images/multiple_objects_video.mov" type="video/mp4">
@@ -155,22 +157,26 @@ _Bright object detection example_
 
 _Live video demonstration of multiple object detection_
 
-![Multiple Objects](images/multiple_objects.png)
+<img src="images/multiple_objects.png" width="400" alt="Multiple Objects">
+
 _Handling multiple objects in the field of view_
 
-![Multiple Objects](images/chair_cup.png)
-_Handling multiple objects in the field of view_
+<img src="images/chair_cup.png" width="400" alt="Multiple Objects">
 
+_Handling multiple objects in the field of view_
 
 ### Distance Measurement Accuracy
 
-![Distance Accuracy Test](images/distance_accuracy_test.jpg)
+<img src="images/distance_accuracy_test.jpg" width="400" alt="Distance Accuracy Test">
+
 _Distance measurement accuracy demonstration_
 
-![Close Range Detection](images/close_range_detection.jpg)
+<img src="images/close_range_detection.jpg" width="400" alt="Close Range Detection">
+
 _Close range object detection (minimum 40mm)_
 
-![Far Range Detection](images/far_range_detection.jpg)
+<img src="images/far_range_detection.jpg" width="400" alt="Far Range Detection">
+
 _Long range object detection capabilities_
 
 ## Tips n Tricks
@@ -181,4 +187,4 @@ To surpass this, you will need to move the files you want to include directly on
 
 ## Future Work
 
-![](diagrams/kontekstDiagram.png)
+<img src="diagrams/kontekstDiagram.png" width="600" alt="Context Diagram">
