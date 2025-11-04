@@ -106,10 +106,11 @@ This is where the most problems occurred. See [Troubleshooting](#troubleshooting
 <img src="images/save_script.png" width="400" alt="Save script">
 
 5. Disconnect the camera from the computer and connect it to a power source. This can be an outlet or a battery connected to the nicla vision power pins.
+
    - The camera will automatically connect to the specified network and the light is blue.
    - Open a browser and navigate to the stream, the light turns green when streaming. The stream does not start untill a browser is opened.
    - View the live stream with obstacle detection.
-   
+
      <img src="images/connected_wall.png" width="300" alt="Green wall">
 
 #### Troubleshooting Wifi Connection
@@ -161,34 +162,51 @@ _Bright object detection example_
 
 _Live video demonstration of multiple object detection_
 
-<img src="images/multiple_objects.png" width="400" alt="Multiple Objects">
-
-_Handling multiple objects in the field of view_
-
-<img src="images/chair_cup.png" width="400" alt="Multiple Objects">
-
-_Handling multiple objects in the field of view_
+**Issue**: The system struggles with stability when multiple objects are present. It frequently switches between detected objects because the algorithm cannot accurately determine which object is actually closest - it only identifies which object is closest to the center and dark relative to the background. When the camera moves or lighting conditions change slightly, the detected "closest" object switches unpredictably between the available targets. This creates an unstable detection that jumps between objects rather than consistently tracking the genuinely nearest obstacle.
 
 ### Distance Measurement Accuracy
 
-<img src="images/distance_accuracy_test.jpg" width="400" alt="Distance Accuracy Test">
+**Limitation**: The camera has a single ToF distance sensor that measures distance at the center point only. This creates the illusion that the entire image has the same depth as the center point. While the distance reading is accurate when the closest object lies in the center, it might not precisely reflect the distance when the closest object it positioned elsewhere.
 
-_Distance measurement accuracy demonstration_
+#### Close Range Performance
 
-<img src="images/close_range_detection.jpg" width="400" alt="Close Range Detection">
+- **Minimum distance**: 40mm (4cm) as specified in the [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
+- **Issue**: Objects placed closer than 40mm cause distance readings to increase rather than decrease and are unreliable
 
-_Close range object detection (minimum 40mm)_
+#### Long Range Performance
 
-<img src="images/far_range_detection.jpg" width="400" alt="Far Range Detection">
+- **Maximum range**: Up to 4m theoretically, limited to 2m in implementation
+- **Hardware limitation**: Performance degrades in low-light conditions per [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
+- **Algorithm limitation**: At longer distances, the blob detection algorithm struggles to accurately identify which detected object corresponds to the distance measurement from the center-point sensor
 
-_Long range object detection capabilities_
+### Streaming Performance
+
+**Current Status**: The WiFi stream experiences intermittent lag that, while manageable, can impact user experience during real-time monitoring.
+
+**Lag Sources**: Stream lag occurs due to multiple factors:
+
+- **Network limitation**: Required use of 2.4GHz WiFi band limits bandwidth
+- **Processing overhead**: Real-time image calculations (blob detection, distance measurement, visualization) consume significant processing power
+- **Image transmission**: Converting and streaming frames over HTTP adds latency
+
+**Optimization Strategy**: To improve streaming performance, several compromises were made:
+
+- **Grayscale format**: Reduces data size compared to color images
+- **QVGA resolution**: Lower 320x240 resolution decreases processing time and transmission bandwidth
+- **Reduced JPEG quality**: Compressed image quality balances stream responsiveness with visual clarity
+
+**Trade-off**: There's a balance between maintaining smooth streaming performance and preserving enough image quality for accurate object detection and analysis.
+
+## Future Improvements
+
+The end goal is to provide stable obstacle info for avoidance. Implementing a function that provides the average of recent positions and distance measurements could improve consistency and reliability. Although large distance variations may cause instability in the averaged results.
+
+The wifi stream lags at times and requires stable wifi, which makes it vulnerable. In a future improvement, only sending the obstacle info over serial communication would be beneficial.
+
+<img src="diagrams/kontekstDiagram.png" width="600" alt="Context Diagram">
 
 ## Tips n Tricks
 
 If you want to divide the code into multiple files using OpenMV, you will get include errors.
 
 To surpass this, you will need to move the files you want to include directly onto the Nicla Vision camera's internal storage drive (not your computer's drive). When the camera is connected via USB, it appears as a separate USB drive in your file explorer - copy the Python files you want include there.
-
-## Future Work
-
-<img src="diagrams/kontekstDiagram.png" width="600" alt="Context Diagram">
