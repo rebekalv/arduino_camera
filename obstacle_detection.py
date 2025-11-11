@@ -20,14 +20,15 @@ sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
 sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
 sensor.skip_frames(time=500)
 
-# Camera specifications
+# Camera specifications and focal length
 pixel_size_mm = 1.75e-3
 sensor_px_width = 1616      # active pixel array width
 image_px_width  = 320       # QVGA capture width
 f_mm = 2.2                  # focal length in mm
+f_tuned_mm = 100.0            # tuned focal length, increase value to decrease object width estimates
 
 sensor_width_mm = pixel_size_mm * sensor_px_width
-focal_length_px = int((f_mm * image_px_width) / sensor_width_mm) # approx 249
+focal_length_px = f_tuned_mm + int((f_mm * image_px_width) / sensor_width_mm) # approx 248 + tuned value
 
 # Distance sensor setup (ToF = time of flight)
 i2c = I2C(2)
