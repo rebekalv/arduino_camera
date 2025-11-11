@@ -94,34 +94,29 @@ In the future development, only sending the obstacle info (distance and size) ov
 
 _Detection system architecture_
 
-- **Image Capture**: Captures grayscale images at QVGA (320x240) resolution
 
-```python
-sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
-sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
-```
 
-- **Distance Measurement**: Uses the integrated ToF VL53L1X sensor. Defines a valid range from 40mm to 2000mm.
 
-```python
-MIN_VALID_DISTANCE = 40  # mm
-MAX_VALID_DISTANCE = 2000 # mm
-```
+- **Target Selection & Tracking**: Prioritizes blobs near image center, which is the ToF sensor line-of-sight.
 
-- **Real-time Blob Detection**: Identifies dark objects (blobs) standing out from the background. The `color_threasholds` are recalculated at every capture based on the average background brightness to handle varying lighting conditions.
 
-```python
-# Find dark blobs
-blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
+- **Visualization & Streaming**: Draw bounding box and distance on the frame; stream compressed grayscale JPEG over 2.4 GHz Wi‑Fi. Tradeoffs (grayscale, QVGA, JPEG quality) were chosen to balance detection accuracy and streaming responsiveness.
 
-```
 
-- **Target Selection & Tracking**: Prioritizes blobs nearest the distance sensor's line-of-sight (center), where the sensor most accurate. Ignores objects that are too small or too large to reduce false positives.
+## Results and Features
+An algorithm had to be chosen for detecting obstacles and sending the information. Blob detection was chosen because it is lightweight, fast and easy to tune for high‑contrast (dark) objects. It runs efficiently on the OpenMV / Nicla platform compared to heavier ML methods, which helps maintain real‑time FPS and reduces power use. Blob detection works by defining ´´Dark´´ as the average background brightness pluss an offset and grouping objects of the same luminissense together into blobs. To handle changing lighting, the background brightness is recalculated every frame, improving reliability without complex preprocessing. An issure occurred when there were several blobs or obstacles, because there was no real way of telling which was closest to the camera. A solution was to prioritize blobs near image center,where the ToF sensor line-of-sight is.
 
-- **Visualization**: Draws box around nearest obstacle and displays distance information on live feed
+Having chosen blob detection motivated using grayscale, because it reduces data size and preserves luminance contrast, which is what the blob detector uses. Processing grayscale frames is faster and requires less memory/CPU than color, improving real‑time performance on the Nicla Vision. QVGA resolution was chosen as a compromise between spatial detail and throughput: 320×240 gives enough image resolution for obstacle detection while keeping processing and network transmission load low to meet FPS targets.
 
-## Results and Examples
-Object detection, distance accuracy and wifi stream performance.
+Wi‑Fi streaming was chosen primarily for convenience, it seemed the easiest way to visualize and validate annotated frames in a browser during development and demonstrations. However it adds latency and can be unstable; for robot integration a simple serial transmission of obstacle data (distance + object size/position) is recommended.
+
+Summary of observed results (concise):
+- Single dark object detection: works reliably in many conditions.  
+- Bright object detection: not supported (gave too many false positives).  
+- Multiple objects: unstable selection when several dark objects compete near center.  
+- Distance: single center ToF is accurate when target is centered; off‑center targets will not have matching depth.  
+- Streaming: intermittent lag; tradeoffs (grayscale, QVGA, JPEG quality) chosen to improve responsiveness.
+
 
 ### Object detection Performance
 
