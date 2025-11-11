@@ -8,8 +8,8 @@
 
 // UARTE
 #define P1 32
-#define UARTE_TX_PIN (P1+2)  // 1.02
-#define UARTE_RX_PIN (P1+1)  // 1.01
+#define UARTE_TX_PIN (P1+2)  // P1.02
+#define UARTE_RX_PIN (P1+1)  // P1.01
 #define UARTE_BAUDRATE NRF_UARTE_BAUDRATE_115200
 #define RX_DATA_LENGTH 6
 #define UARTE_TIMEOUT_MS 100
@@ -79,6 +79,21 @@ bool uarte1_receive_data(void)
     return true;
 }
 
+int uarte1_get_line_estimate()
+{
+  uarte1_request_data();
+
+  if(uarte1_receive_data())
+  {
+    int16_t x_start_mm = rx_buffer[0] | (rx_buffer[1] << 8);
+    int16_t x_width_mm = rx_buffer[2] | (rx_buffer[3] << 8);
+    int16_t distance_mm = rx_buffer[4] | (rx_buffer[5] << 8);
+
+     NRF_LOG_INFO("x_start_mm: %d, x_width_mm: %d, distance_mm: %d", x_start_mm, x_width_mm, distance_mm);
+     NRF_LOG_FLUSH();
+  }
+}
+
 int main(void)
 {
     APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
@@ -89,17 +104,7 @@ int main(void)
     while (true)
     {
     
-        uarte1_request_data();
-
-        if(uarte1_receive_data())
-        {
-          uint16_t x_start = rx_buffer[0] | (rx_buffer[1] << 8);
-          uint16_t x_end = rx_buffer[2] | (rx_buffer[3] << 8);
-          uint16_t distance_cm = rx_buffer[4] | (rx_buffer[5] << 8);
-
-           NRF_LOG_INFO("x_start: %d, x_end: %d, distance: %d", x_start, x_end, distance_cm);
-           NRF_LOG_FLUSH();
-        }
+        
 
         nrf_delay_ms(1000); // delay between requests
     }
