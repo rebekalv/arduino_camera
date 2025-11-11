@@ -5,7 +5,7 @@ Year: 2025
 Student: Rebekka Alve
 
 ## Summary
-This project implements a real-time obstacle detection system on an Arduino Nicla Vision using OpenMV firmware. It detects dark objects using blob detection, reads distance from the integrated ToF sensor, selects the nearest object, overlays a bounding box and distance on the frame, and streams the annotated video over 2.4 GHz Wi‑Fi.
+This project implements a real-time obstacle detection system on an Arduino Nicla Vision using OpenMV firmware. It detects dark objects using blob detection, reads distance from the integrated ToF sensor, selects the nearest object, overlays a bounding box and distance on the frame, and streams the video over 2.4 GHz Wi‑Fi.
 
 <img src="images/green.png" width="400" alt="Nicla vision green">
 
@@ -30,7 +30,7 @@ _Object detection on wifi stream_
 - [How to Run](#how-to-run)
   - [Without Wifi Streaming](#without-wifi-streaming)
   - [With wifi streaming](#with-wifi-streaming)
-- [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
+    - [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
 - [Results and Examples](#results-and-examples)
   - [Object detection Performance](#object-detection-performance)
     - [Dark Object Detection](#dark-object-detection)
@@ -120,6 +120,80 @@ blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_thres
 
 - **Visualization**: Draws box around nearest obstacle and displays distance information on live feed
 
+## Results and Examples
+Object detection, distance accuracy and wifi stream performance.
+
+### Object detection Performance
+
+#### Dark Object Detection
+
+**Current Status**: Working
+
+Selects the object closest to the center of the image, where the distance sensor is the most accurate.
+
+<img src="images/detect_plant.png" width="400" alt="Dark Object Detection">
+
+_Dark object detection with distance measurement_
+
+#### Bright Object Detection
+
+**Current Status**: Not supported. Not working.
+
+**Issue**: The system only detects dark objects. In the example image, light-colored glasses are placed in front of a dark chair, but the algorithm incorrectly identifies the chair as the closest obstacle because:
+
+- It prioritizes dark objects over bright ones
+- The chair is closer than the dark plant to the image center (where the distance sensor is most accurate)
+
+**Design Decision**: Earlier code versions included a toggle between dark and bright object detection. However, bright object detection frequently misidentified walls, windows, and background elements as targets instead of actual objects of interest. To improve reliability, the feature was removed and the system now focuses exclusively on dark object detection.
+
+<img src="images/chair_glass.png" width="400" alt="Bright Object Detection">
+
+_Bright object detection example_
+
+#### Multiple Objects
+
+**Current Status**: Works sometimes
+
+<img src="images/short_multiple_video.gif" width="400" alt="Multiple Objects Video Demo">
+
+_Live video demonstration of multiple object detection_
+
+**Issue**: The system struggles with stability when multiple objects are present. It frequently switches between detected objects because the algorithm cannot accurately determine which object is actually closest - it only identifies which object is closest to the center and dark relative to the background. When the camera moves or lighting conditions change slightly, the detected "closest" object switches unpredictably between the available targets. This creates an unstable detection that jumps between objects rather than consistently tracking the genuinely nearest obstacle.
+
+### Distance Measurement Accuracy
+
+**Limitation**: The camera has a single ToF distance sensor that measures distance at the center point only. This creates the illusion that the entire image has the same depth as the center point. While the distance reading is accurate when the closest object lies in the center, it might not precisely reflect the distance when the closest object it positioned elsewhere.
+
+#### Close Range Performance
+
+- **Minimum distance**: 40mm (4cm) as specified in the [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
+- **Issue**: Objects placed closer than 40mm cause distance readings to increase rather than decrease and are unreliable
+
+#### Long Range Performance
+
+- **Maximum range**: Up to 4m theoretically, limited to 2m in implementation
+- **Hardware limitation**: Performance degrades in low-light conditions per [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
+- **Algorithm limitation**: At longer distances, the blob detection algorithm struggles to accurately identify which detected object corresponds to the distance measurement from the center-point sensor
+
+### Streaming Performance
+
+**Current Status**: The WiFi stream experiences intermittent lag that, while manageable, can impact user experience during real-time monitoring.
+
+**Lag Sources**: Stream lag occurs due to multiple factors:
+
+- **Network limitation**: Required use of 2.4GHz WiFi band limits bandwidth
+- **Processing overhead**: Real-time image calculations (blob detection, distance measurement, visualization) consume significant processing power
+- **Image transmission**: Converting and streaming frames over HTTP adds latency
+
+**Optimization Strategy**: To improve streaming performance, several compromises were made:
+
+- **Grayscale format**: Reduces data size compared to color images
+- **QVGA resolution**: Lower 320x240 resolution decreases processing time and transmission bandwidth
+- **Reduced JPEG quality**: Compressed image quality balances stream responsiveness with visual clarity
+
+**Trade-off**: There's a balance between maintaining smooth streaming performance and preserving enough image quality for accurate object detection and analysis.
+
+
 ## Prerequisites
 
 ### 1. Hardware Requirements
@@ -199,78 +273,6 @@ This is where the most problems occurred. See [Troubleshooting](#troubleshooting
 1. Another solution is to connect your computer to ethernet, and enable a mobile hotspot (selecting the 2.4 GHz band).
 1. If your browser blocks the HTTP stream (showing "Not Secure" warning), click "Advanced" on the security warning and select "Proceed to [IP address] (unsafe)". Your browser might have further restrictions, denying you access.
 
-## Results and Examples
-Object detection, distance accuracy and wifi stream performance.
-
-### Object detection Performance
-
-#### Dark Object Detection
-
-**Current Status**: Working
-
-Selects the object closest to the center of the image, where the distance sensor is the most accurate.
-
-<img src="images/detect_plant.png" width="400" alt="Dark Object Detection">
-
-_Dark object detection with distance measurement_
-
-#### Bright Object Detection
-
-**Current Status**: Not supported. Not working.
-
-**Issue**: The system only detects dark objects. In the example image, light-colored glasses are placed in front of a dark chair, but the algorithm incorrectly identifies the chair as the closest obstacle because:
-
-- It prioritizes dark objects over bright ones
-- The chair is closer than the dark plant to the image center (where the distance sensor is most accurate)
-
-**Design Decision**: Earlier code versions included a toggle between dark and bright object detection. However, bright object detection frequently misidentified walls, windows, and background elements as targets instead of actual objects of interest. To improve reliability, the feature was removed and the system now focuses exclusively on dark object detection.
-
-<img src="images/chair_glass.png" width="400" alt="Bright Object Detection">
-
-_Bright object detection example_
-
-#### Multiple Objects
-
-**Current Status**: Works sometimes
-
-<img src="images/short_multiple_video.gif" width="400" alt="Multiple Objects Video Demo">
-
-_Live video demonstration of multiple object detection_
-
-**Issue**: The system struggles with stability when multiple objects are present. It frequently switches between detected objects because the algorithm cannot accurately determine which object is actually closest - it only identifies which object is closest to the center and dark relative to the background. When the camera moves or lighting conditions change slightly, the detected "closest" object switches unpredictably between the available targets. This creates an unstable detection that jumps between objects rather than consistently tracking the genuinely nearest obstacle.
-
-### Distance Measurement Accuracy
-
-**Limitation**: The camera has a single ToF distance sensor that measures distance at the center point only. This creates the illusion that the entire image has the same depth as the center point. While the distance reading is accurate when the closest object lies in the center, it might not precisely reflect the distance when the closest object it positioned elsewhere.
-
-#### Close Range Performance
-
-- **Minimum distance**: 40mm (4cm) as specified in the [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
-- **Issue**: Objects placed closer than 40mm cause distance readings to increase rather than decrease and are unreliable
-
-#### Long Range Performance
-
-- **Maximum range**: Up to 4m theoretically, limited to 2m in implementation
-- **Hardware limitation**: Performance degrades in low-light conditions per [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
-- **Algorithm limitation**: At longer distances, the blob detection algorithm struggles to accurately identify which detected object corresponds to the distance measurement from the center-point sensor
-
-### Streaming Performance
-
-**Current Status**: The WiFi stream experiences intermittent lag that, while manageable, can impact user experience during real-time monitoring.
-
-**Lag Sources**: Stream lag occurs due to multiple factors:
-
-- **Network limitation**: Required use of 2.4GHz WiFi band limits bandwidth
-- **Processing overhead**: Real-time image calculations (blob detection, distance measurement, visualization) consume significant processing power
-- **Image transmission**: Converting and streaming frames over HTTP adds latency
-
-**Optimization Strategy**: To improve streaming performance, several compromises were made:
-
-- **Grayscale format**: Reduces data size compared to color images
-- **QVGA resolution**: Lower 320x240 resolution decreases processing time and transmission bandwidth
-- **Reduced JPEG quality**: Compressed image quality balances stream responsiveness with visual clarity
-
-**Trade-off**: There's a balance between maintaining smooth streaming performance and preserving enough image quality for accurate object detection and analysis.
 
 ## Tips n Tricks
 
