@@ -1,22 +1,98 @@
-# TTK8 - Object Detection with an Arduino Nicla Vision Camera
+# Object Detection with an Arduino Nicla Vision Camera
 
-This project uses the OpenMV firmware to implement object detection on the Arduino Nicla Vision camera. The system combines blob detection with the integrated distance sensor to identify the nearest object. The object gets marked and the video is streamed over wifi to track obstacles in real-time.
+Course: TTK8  
+Year: 2025  
+Student: Rebekka Alve
 
-<img src="images/mug_stream.png" width="400" alt="Stream Mug">
-
-_Object detection on wifi stream_
+## Summary
+This project implements a real-time obstacle detection system on an Arduino Nicla Vision using OpenMV firmware. It detects dark objects using blob detection, reads distance from the integrated ToF sensor, selects the nearest object, overlays a bounding box and distance on the frame, and streams the annotated video over 2.4 GHz Wi‑Fi.
 
 <img src="images/green.png" width="400" alt="Nicla vision green">
 
 _Nicla Vision Streaming Video_
 
-**Plot twist:** What started as an innocent object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
+<img src="images/mug_stream.png" width="400" alt="Stream Mug">
+
+_Object detection on wifi stream_
+
+**Plot twist:** What started as an object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
+
+## Table of Contents
+- [Summary](#summary)
+- [Table of Contents](#table-of-contents)
+- [List of Abbreviations](#list-of-abbreviations)
+- [Future Improvements](#future-improvements)
+- [Success criteria](#success-critera)
+- [Features & Configuration](#features--configuration)
+- [Prerequisites](#prerequisites)
+  - [Hardware Requirements](#1-hardware-requirements)
+  - [Install OpenMV IDE](#2-install-openmv-ide)
+- [How to Run](#how-to-run)
+  - [Without Wifi Streaming](#without-wifi-streaming)
+  - [With wifi streaming](#with-wifi-streaming)
+- [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
+- [Results and Examples](#results-and-examples)
+  - [Object detection Performance](#object-detection-performance)
+    - [Dark Object Detection](#dark-object-detection)
+    - [Bright Object Detection](#bright-object-detection)
+    - [Multiple Objects](#multiple-objects)
+  - [Distance Measurement Accuracy](#distance-measurement-accuracy)
+    - [Close Range Performance](#close-range-performance)
+    - [Long Range Performance](#long-range-performance)
+  - [Streaming Performance](#streaming-performance)
+- [Tips n Tricks](#tips-n-tricks)
+
+## List of Abbreviations
+
+- ToF — Time‑of‑Flight (distance sensor)  
+- QVGA — Quarter VGA (320 × 240 resolution)  
+- FPS — Frames Per Second  
+- BOM — Bill of Materials  
+- Wi‑Fi — Wireless Fidelity (2.4 GHz)  
+- OpenMV — OpenMV firmware / platform  
+- IDE — Integrated Development Environment  
+- Nicla — Arduino Nicla Vision (camera module)  
+- USB — Universal Serial Bus  
+- HTTP — HyperText Transfer Protocol  
+- JPEG — Joint Photographic Experts Group (image format)  
+- WPA2 — Wi‑Fi Protected Access II (wireless security)  
+- IP — Internet Protocol (address)  
+- DHCP — Dynamic Host Configuration Protocol  
+- mm — millimetre(s)  
+- VL53L1X — STMicroelectronics ToF sensor model (sensor part number)
+
+
+## Future Improvements
+The camera is intended to be mounted on a mobile robot in a larger project: detected obstacles and distance readings will be sent to the robot's control system to enable obstacle avoidance behaviors (stop, steer around, or re-route).
+
+In the future development, only sending the obstacle info (distance and size) over serial communication will be beneficial, as streaming might lag and is vulnreable to unstable wifi connection. In addition, the robots already use wifi to communicate with the robot server, which might complicate camera communication over wifi.
+
+<img src="diagrams/kontekstDiagram.png" width="600" alt="Context Diagram">
+
+## Success critera
+
+1. Deliverables
+
+   1.1. Working Nicla Vision script -> yes
+
+   1.2. Step‑by‑step setup instructions (firmware update, upload, network setup) -> yes
+
+   1.3. Test results with examples and analysis -> yes
+
+
+2. Success criteria
+
+   2.1. Reliable detection of the nearest dark object -> sometimes
+
+   2.2. Reliable distance readings within the specified accuracy range -> yes
+
+   2.3. Continuous Wi‑Fi streaming -> mostly
 
 ## Features & Configuration
 
 <img src="diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
 
-_How the detection system works_
+_Detection system architecture_
 
 - **Image Capture**: Captures grayscale images at QVGA (320x240) resolution
 
@@ -196,16 +272,9 @@ _Live video demonstration of multiple object detection_
 
 **Trade-off**: There's a balance between maintaining smooth streaming performance and preserving enough image quality for accurate object detection and analysis.
 
-## Future Improvements
-
-The end goal is to provide stable obstacle info for avoidance. Implementing a function that provides the average of recent positions and distance measurements could improve consistency and reliability. Although large distance variations may cause instability in the averaged results.
-
-The wifi stream lags at times and requires stable wifi, which makes it vulnerable. In a future improvement, only sending the obstacle info over serial communication would be beneficial.
-
-<img src="diagrams/kontekstDiagram.png" width="600" alt="Context Diagram">
-
 ## Tips n Tricks
 
 If you want to divide the code into multiple files using OpenMV, you will get include errors.
 
 To surpass this, you will need to move the files you want to include directly onto the Nicla Vision camera's internal storage drive (not your computer's drive). When the camera is connected via USB, it appears as a separate USB drive in your file explorer - copy the Python files you want include there.
+
