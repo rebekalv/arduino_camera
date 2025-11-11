@@ -3,12 +3,11 @@ from machine import I2C
 from vl53l1x import VL53L1X
 
 # Enable wifi
-WIFI_STREAMING = False # Set to False to disable wifi streaming
-WIFI_NAME = "ASUS"
-WIFI_KEY = "oliven23"
+WIFI_STREAMING = True # Set to False to disable wifi streaming
+WIFI_NAME = "Volvevegen_2G"
+WIFI_KEY = "Volvevegen"
 
 # Parameters BLOB DETECTION
-THRESHOLD_TYPE = "dark"  # "dark" or "bright"
 OFFSET = 30  # threshold offset around mean background brightness
 min_area = 300       # ignore tiny blobs
 min_pixels = 300     # ignore tiny blobs
@@ -17,17 +16,14 @@ max_fraction = 0.95   # ignore blobs covering more than 90% of image (not workin
 # Camera setup
 sensor.reset()
 sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
-sensor.set_framesize(sensor.QVGA)
-sensor.skip_frames(time=2000)
+sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
+sensor.skip_frames(time=500)
 
 # Distance sensor setup (ToF = time of flight)
 i2c = I2C(2)
 tof = VL53L1X(i2c)
 MIN_VALID_DISTANCE = 40  # mm
-
-# Buffer (last 10 readings) for smoothing noisy detections
-readings = []
-MAX_READINGS = 10
+MAX_VALID_DISTANCE = 2000 # mm
 
 # LEDs
 red = pyb.LED(1)
@@ -58,16 +54,17 @@ def wifi_setup(name, key): # returns wifi client
     wlan.active(True)
     wlan.connect(name, key)
     # Set statisk IP: (IP, netmask, gateway, DNS)
-    wlan.ifconfig(('192.168.1.30', '255.255.255.0', '192.168.1.1', '8.8.8.8'))
+    #wlan.ifconfig(('192.168.2.30', '255.255.255.0', '192.168.2.1', '8.8.8.8'))
 
     print('Trying to connect to network "{:s}"'.format(name))
     print('with passkey "{:s}"\n'.format(key))
 
     while not wlan.isconnected():
-        time.sleep_ms(1000)
+        time.sleep(1)
+        print("Status:", wlan.status())
 
-    print("WiFi Connected ", wlan.ifconfig())
-    print("Open a browser and enter http://{:s}:{:d}/".format(wlan.ifconfig()[0], PORT))
+    print("WiFi Connected\n")
+    print("Open a browser and enter http://{:s}:{:d}/ \n".format(wlan.ifconfig()[0], PORT))
 
     # Create server socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -110,25 +107,18 @@ def detect_obstacles(wifi_client=None):
     img = sensor.snapshot()
 
     ## DISTANCE SENSOR
-    dist = tof.read()  # Read distance
-
-    ## BLOB DETECTION
+    dist = tof.read()  # Read distance in mm
 
     # Dynamic background brightness
     stats = img.get_statistics()
     mean_val = stats.l_mean()
-    if THRESHOLD_TYPE == "dark":
-       limit = max(0, mean_val - OFFSET)
-       thresholds = [(0, limit)]
-    else:
-       limit = min(255, mean_val + OFFSET)
-       thresholds = [(limit, 255)]
+    limit = max(0, mean_val - OFFSET)
+    color_thresholds = [(0, limit)]
 
+    # Find dark blobs
+    blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
 
-    # Find dark or light blobs
-    blobs = img.find_blobs(thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
-
-    if blobs and dist > MIN_VALID_DISTANCE:
+    if blobs and dist > MIN_VALID_DISTANCE and dist < MAX_VALID_DISTANCE:
         # Center of the image (where ToF points)
         center_x = img.width() // 2
         center_y = img.height() // 2
@@ -164,21 +154,6 @@ def detect_obstacles(wifi_client=None):
             img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
             img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
 
-            # Get x-range of the blob, NB: pixels 0-320
-            x_min = target.x()
-            x_max = target.x() + target.w()
-
-            # Store in buffer
-            readings.append((x_min,x_max,dist))
-
-            # Print the average of the last N readings
-            if len(readings) == MAX_READINGS:
-                x_min = sum(r[0] for r in readings) // MAX_READINGS
-                x_max = sum(r[1] for r in readings) // MAX_READINGS
-                dist = sum(r[2] for r in readings) // MAX_READINGS
-                print(x_min, x_max, dist)
-                readings.pop(0)  # remove oldest reading
-
     ## WIFI STREAMING
     if WIFI_STREAMING and wifi_client:
         wifi_stream_frame(wifi_client, img)
@@ -188,6 +163,7 @@ try:
     wifi_client = (wifi_setup(WIFI_NAME, WIFI_KEY) if WIFI_STREAMING else None)
     blue.off()
     green.on()
+    print("Offset mm, Object width mm, Distance mm")
     while True:
         detect_obstacles(wifi_client)
 except:
