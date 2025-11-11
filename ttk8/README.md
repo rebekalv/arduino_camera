@@ -67,7 +67,7 @@ The camera is intended to be mounted on a mobile robot in a larger project: dete
 
 In the future development, only sending the obstacle info (distance and size) over serial communication will be beneficial, as streaming might lag and is vulnreable to unstable wifi connection. In addition, the robots already use wifi to communicate with the robot server, which might complicate camera communication over wifi.
 
-<img src="diagrams/kontekstDiagram.png" width="600" alt="Context Diagram">
+<img src="diagrams/kontekstDiagram.png" width="750" alt="Context Diagram">
 
 ## Success critera
 
