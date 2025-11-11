@@ -125,9 +125,9 @@ Object detection, distance accuracy and wifi stream performance.
 
 ### Object detection Performance
 
-#### Dark Object Detection
+#### Single Dark Object Detection
 
-**Current Status**: Working
+Current Status: Working
 
 Selects the object closest to the center of the image, where the distance sensor is the most accurate.
 
@@ -137,9 +137,9 @@ _Dark object detection with distance measurement_
 
 #### Bright Object Detection
 
-**Current Status**: Not supported. Not working.
+Current Status: Not supported. Not working.
 
-**Issue**: The system only detects dark objects. In the example image, light-colored glasses are placed in front of a dark chair, but the algorithm incorrectly identifies the chair as the closest obstacle because:
+**Issue**: The system only detects dark objects. In the example image below, light-colored glasses are placed in front of a dark chair, but the algorithm incorrectly identifies the chair as the closest obstacle because:
 
 - It prioritizes dark objects over bright ones
 - The chair is closer than the dark plant to the image center (where the distance sensor is most accurate)
@@ -152,13 +152,13 @@ _Bright object detection example_
 
 #### Multiple Objects
 
-**Current Status**: Works sometimes
+Current Status: Works sometimes
 
 <img src="images/short_multiple_video.gif" width="400" alt="Multiple Objects Video Demo">
 
 _Live video demonstration of multiple object detection_
 
-**Issue**: The system struggles with stability when multiple objects are present. It frequently switches between detected objects because the algorithm cannot accurately determine which object is actually closest - it only identifies which object is closest to the center and dark relative to the background. When the camera moves or lighting conditions change slightly, the detected "closest" object switches unpredictably between the available targets. This creates an unstable detection that jumps between objects rather than consistently tracking the genuinely nearest obstacle.
+**Issue**: The system struggles with stability when multiple objects are present. It frequently switches between different objects because the algorithm cannot accurately determine which object is actually closest - it only identifies which object is closest to the image center and dark relative to the background. When the camera moves or lighting conditions change slightly, the detected "closest" object switches unpredictably between the available targets. This creates an unstable detection that jumps between objects rather than consistently tracking the genuinely nearest obstacle.
 
 ### Distance Measurement Accuracy
 
