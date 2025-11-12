@@ -5,7 +5,10 @@ Year: 2025
 Student: Rebekka Alve
 
 ## Summary
-This project implements a real-time obstacle detection system on an Arduino Nicla Vision using OpenMV firmware. It detects dark objects using blob detection, reads distance from the integrated ToF sensor, selects the nearest object, overlays a bounding box and distance on the frame, and streams the video over 2.4 GHz Wi‑Fi.
+This project implements a real-time obstacle detection system on an Arduino Nicla Vision using OpenMV firmware. It detects dark objects using blob detection and reads the distance from the integrated ToF sensor. The information is transmitted as camera frames over 2.4 GHz Wi-Fi, with an overlaying bounding box and distance on the frame, marking the closest obstacle.
+
+The algorithm worked reliably for single dark objects in many conditions. The support for bright objects was removed because of too many false positives (walls, windows, etc). For multiple dark objects, the selection was unstable, but working. The distance measured was accurate when the target was centered, and not as accurate if off-center. The stream had some lag and tradeoffs (grayscale, QVGA, JPEG quality) had to be done to improve streaming responsiveness at the cost of image and detection accuracy.
+
 
 <img src="images/green.png" width="400" alt="Nicla vision green">
 
@@ -19,14 +22,14 @@ _Object detection on wifi stream_
 
 ## Table of Contents
 - [Summary](#summary)
-- [Table of Contents](#table-of-contents)
 - [List of Abbreviations](#list-of-abbreviations)
 - [Future Improvements](#future-improvements)
-- [Success criteria](#success-critera)
-- [Features & Configuration](#features--configuration)
-- [Results and Examples](#results-and-examples)
+- [Success critera](#success-critera)
+- [Results and Features](#results-and-features)
+  - [Overview](#overview)
+  - [Algorithm](#algorithm)
   - [Object detection Performance](#object-detection-performance)
-    - [Dark Object Detection](#dark-object-detection)
+    - [Single Dark Object Detection](#single-dark-object-detection)
     - [Bright Object Detection](#bright-object-detection)
     - [Multiple Objects](#multiple-objects)
   - [Distance Measurement Accuracy](#distance-measurement-accuracy)
@@ -39,35 +42,35 @@ _Object detection on wifi stream_
 - [How to Run](#how-to-run)
   - [Without Wifi Streaming](#without-wifi-streaming)
   - [With wifi streaming](#with-wifi-streaming)
-    - [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
+  - [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
 - [Tips n Tricks](#tips-n-tricks)
+- [Appendix / References](#appendix--references)
 
 ## List of Abbreviations
 
-- ToF — Time‑of‑Flight (distance sensor)  
+- ToF — Time‑of‑Flight (distance sensor, e.g., VL53L1X)  
 - QVGA — Quarter VGA (320 × 240 resolution)  
 - FPS — Frames Per Second  
-- BOM — Bill of Materials  
-- Wi‑Fi — Wireless Fidelity (2.4 GHz)  
-- OpenMV — OpenMV firmware / platform  
-- IDE — Integrated Development Environment  
+- Wi‑Fi — Wireless Fidelity (2.4 GHz network used for streaming)  
+- OpenMV — OpenMV firmware / platform (used on Nicla Vision)  
+- IDE — Integrated Development Environment (OpenMV IDE)  
 - Nicla — Arduino Nicla Vision (camera module)  
-- USB — Universal Serial Bus  
-- HTTP — HyperText Transfer Protocol  
-- JPEG — Joint Photographic Experts Group (image format)  
-- WPA2 — Wi‑Fi Protected Access II (wireless security)  
-- IP — Internet Protocol (address)  
-- DHCP — Dynamic Host Configuration Protocol  
-- mm — millimetre(s)  
-- VL53L1X — STMicroelectronics ToF sensor model (sensor part number)
+- USB — Universal Serial Bus (programming / power connection)  
+- HTTP — HyperText Transfer Protocol (used for browser streaming)  
+- JPEG — Joint Photographic Experts Group (image compression format used for streaming)  
+- WPA2 — Wi‑Fi Protected Access II (wireless network security)  
+- IP — Internet Protocol (address used to access the stream)  
+- DHCP — Dynamic Host Configuration Protocol (network IP assignment)  
+- mm — millimetre(s) (distance unit)  
+- VL53L1X — STMicroelectronics ToF distance sensor model
 
 
 ## Future Improvements
-The camera is intended to be mounted on a mobile robot in a larger project: detected obstacles and distance readings will be sent to the robot's control system to enable obstacle avoidance behaviors (stop, steer around, or re-route).
+The Nicla Vision camera is intended to be mounted on a mobile robot in a larger project: detected obstacles and distance readings will be sent to the robot's control system to enable obstacle avoidance behaviors (stop, steer around, or re-route).
 
 In the future development, only sending the obstacle info (distance and size) over serial communication will be beneficial, as streaming might lag and is vulnreable to unstable wifi connection. In addition, the robots already use wifi to communicate with the robot server, which might complicate camera communication over wifi.
 
-<img src="diagrams/kontekstDiagram.png" width="750" alt="Context Diagram">
+<img src="diagrams/kontekstDiagramCropped.png" width="750" alt="Context Diagram">
 
 ## Success critera
 
@@ -88,35 +91,24 @@ In the future development, only sending the obstacle info (distance and size) ov
 
    2.3. Continuous Wi‑Fi streaming -> mostly
 
-## Features & Configuration
+
+## Results and Features
+
+### Overview
+The system consists of an integrated distance and camera sensor on the Nicla Vision, which also executes the object detection algorithm. This is then sent over the connected wifi to a specified port and an available IP address.
 
 <img src="diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
 
 _Detection system architecture_
 
+### Algorithm
+An algorithm had to be chosen for detecting obstacles and sending the information to a user or server. Blob detection was chosen as the detection algorithm, because it is lightweight, fast and easy to tune for high‑contrast (dark) objects. It runs efficiently on the OpenMV / Nicla platform compared to heavier ML methods, which helps maintain real‑time FPS and reduces power use. Blob detection works by defining ´´Dark´´ as the average background brightness pluss an offset and grouping objects of the same luminissense together into blobs. To handle changing lighting, the background brightness is recalculated every frame, improving reliability without complex preprocessing. An issure occurred when there were several blobs or obstacles, because there was no real way of telling which was closest to the camera. A solution was to prioritize blobs near the image center, where the ToF sensor line-of-sight is.
 
+Having chosen blob detection further motivated using grayscale, because it reduces the data size and preserves luminance contrast, which is what the blob detector uses. Processing grayscale frames is faster and requires less memory/CPU than color, improving real‑time performance on the Nicla Vision. QVGA (320×240) resolution was chosen as a compromise between spatial detail and throughput, because it gives enough image resolution for obstacle detection while keeping processing and network transmission load low to meet FPS targets.
 
+### Communication
 
-- **Target Selection & Tracking**: Prioritizes blobs near image center, which is the ToF sensor line-of-sight.
-
-
-- **Visualization & Streaming**: Draw bounding box and distance on the frame; stream compressed grayscale JPEG over 2.4 GHz Wi‑Fi. Tradeoffs (grayscale, QVGA, JPEG quality) were chosen to balance detection accuracy and streaming responsiveness.
-
-
-## Results and Features
-An algorithm had to be chosen for detecting obstacles and sending the information. Blob detection was chosen because it is lightweight, fast and easy to tune for high‑contrast (dark) objects. It runs efficiently on the OpenMV / Nicla platform compared to heavier ML methods, which helps maintain real‑time FPS and reduces power use. Blob detection works by defining ´´Dark´´ as the average background brightness pluss an offset and grouping objects of the same luminissense together into blobs. To handle changing lighting, the background brightness is recalculated every frame, improving reliability without complex preprocessing. An issure occurred when there were several blobs or obstacles, because there was no real way of telling which was closest to the camera. A solution was to prioritize blobs near image center,where the ToF sensor line-of-sight is.
-
-Having chosen blob detection motivated using grayscale, because it reduces data size and preserves luminance contrast, which is what the blob detector uses. Processing grayscale frames is faster and requires less memory/CPU than color, improving real‑time performance on the Nicla Vision. QVGA resolution was chosen as a compromise between spatial detail and throughput: 320×240 gives enough image resolution for obstacle detection while keeping processing and network transmission load low to meet FPS targets.
-
-Wi‑Fi streaming was chosen primarily for convenience, it seemed the easiest way to visualize and validate annotated frames in a browser during development and demonstrations. However it adds latency and can be unstable; for robot integration a simple serial transmission of obstacle data (distance + object size/position) is recommended.
-
-Summary of observed results (concise):
-- Single dark object detection: works reliably in many conditions.  
-- Bright object detection: not supported (gave too many false positives).  
-- Multiple objects: unstable selection when several dark objects compete near center.  
-- Distance: single center ToF is accurate when target is centered; off‑center targets will not have matching depth.  
-- Streaming: intermittent lag; tradeoffs (grayscale, QVGA, JPEG quality) chosen to improve responsiveness.
-
+Wi‑Fi streaming was chosen as the communication medium primarily for convenience and out curiosity. The distance and a bounding box is drawn onto each wifi frame, marking the nearest object and its proximity. This seemed the easiest way to visualize and validate the obstacle detection in a browser during development and demonstrations. However it adds latency and can be unstable. The bandwitdth is litmited to 2.4 GHz, which limits the JPEG quality that can be transmitted. For later robot integration, a simple serial transmission of obstacle data (distance + object size/position) is recommended.
 
 ### Object detection Performance
 
@@ -275,3 +267,10 @@ If you want to divide the code into multiple files using OpenMV, you will get in
 
 To surpass this, you will need to move the files you want to include directly onto the Nicla Vision camera's internal storage drive (not your computer's drive). When the camera is connected via USB, it appears as a separate USB drive in your file explorer - copy the Python files you want include there.
 
+## Appendix / References
+
+- [Arduino Nicla Vision datasheet](https://docs.arduino.cc/hardware/nicla-vision/)
+- [Arduino Nicla Vision blob detection toturial](https://docs.arduino.cc/tutorials/nicla-vision/blob-detection/)
+- [Arduino Nicla Vision wifi streaming toturial](https://docs.arduino.cc/tutorials/nicla-vision/live-streaming/)
+- [TOF distance sensor VL53L1X Datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
+- [OpenMV Documentation](https://docs.openmv.io/)
