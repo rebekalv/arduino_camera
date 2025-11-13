@@ -92,7 +92,7 @@ In the future development, only sending the obstacle info (distance and size) ov
    2.3. Continuous Wi‑Fi streaming -> mostly
 
 
-## Results and Features
+## System Architecture
 
 ### Overview
 The system consists of an integrated distance and camera sensor on the Nicla Vision, which also executes the object detection algorithm. This is then sent over the connected wifi to a specified port and an available IP address.
@@ -109,6 +109,9 @@ Having chosen blob detection further motivated using grayscale, because it reduc
 ### Communication
 
 Wi‑Fi streaming was chosen as the communication medium primarily for convenience and out curiosity. The distance and a bounding box is drawn onto each wifi frame, marking the nearest object and its proximity. This seemed the easiest way to visualize and validate the obstacle detection in a browser during development and demonstrations. However it adds latency and can be unstable. The bandwitdth is litmited to 2.4 GHz, which limits the JPEG quality that can be transmitted. For later robot integration, a simple serial transmission of obstacle data (distance + object size/position) is recommended.
+
+## Results and System Performance
+This section is divided in three parts; object detection performance, distance accuracy and Wi-Fi streaming performance, and evaluates the success critera in relation to each part.
 
 ### Object detection Performance
 
