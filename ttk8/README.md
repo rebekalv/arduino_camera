@@ -20,7 +20,7 @@ _Object detection on wifi stream_
 
 **Plot twist:** What started as an object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
 
-## Table of Contents
+## 2. Table of Contents
 
 1. [Summary](#summary)
 2. [Table of Contents](#table-of-contents)
@@ -67,7 +67,7 @@ _Object detection on wifi stream_
 10. [Tips n Tricks](#tips-n-tricks)
 11. [Appendix / References](#appendix--references)
 
-## List of Abbreviations
+## 3. List of Abbreviations
 
 - ToF — Time‑of‑Flight (distance sensor, e.g., VL53L1X)  
 - QVGA — Quarter VGA (320 × 240 resolution)  
@@ -86,14 +86,14 @@ _Object detection on wifi stream_
 - VL53L1X — STMicroelectronics ToF distance sensor model
 
 
-## Future Improvements
+## 4. Future Improvements
 The Nicla Vision camera is intended to be mounted on a mobile robot in a larger project: detected obstacles and distance readings will be sent to the robot's control system to enable obstacle avoidance behaviors (stop, steer around, or re-route).
 
 In the future development, only sending the obstacle info (distance and size) over serial communication will be beneficial, as streaming might lag and is vulnreable to unstable wifi connection. In addition, the robots already use wifi to communicate with the robot server, which might complicate camera communication over wifi.
 
 <img src="diagrams/kontekstDiagramCropped.png" width="750" alt="Context Diagram">
 
-## Success critera
+## 5. Success critera
 
 1. Deliverables
 
@@ -113,30 +113,30 @@ In the future development, only sending the obstacle info (distance and size) ov
    2.3. Continuous Wi‑Fi streaming -> mostly
 
 
-## System Architecture
+## 6. System Architecture
 
-### Overview
+### 6.1 Overview
 The system consists of an integrated distance and camera sensor on the Nicla Vision, which also executes the object detection algorithm. This is then sent over the connected wifi to a specified port and an available IP address.
 
 <img src="diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
 
 _Detection system architecture_
 
-### Algorithm
+### 6.2 Algorithm
 An algorithm had to be chosen for detecting obstacles and sending the information to a user or server. Blob detection was chosen as the detection algorithm, because it is lightweight, fast and easy to tune for high‑contrast (dark) objects. It runs efficiently on the OpenMV / Nicla platform compared to heavier ML methods, which helps maintain real‑time FPS and reduces power use. Blob detection works by defining ´´Dark´´ as the average background brightness pluss an offset and grouping objects of the same luminissense together into blobs. To handle changing lighting, the background brightness is recalculated every frame, improving reliability without complex preprocessing. An issure occurred when there were several blobs or obstacles, because there was no real way of telling which was closest to the camera. A solution was to prioritize blobs near the image center, where the ToF sensor line-of-sight is.
 
 Having chosen blob detection further motivated using grayscale, because it reduces the data size and preserves luminance contrast, which is what the blob detector uses. Processing grayscale frames is faster and requires less memory/CPU than color, improving real‑time performance on the Nicla Vision. QVGA (320×240) resolution was chosen as a compromise between spatial detail and throughput, because it gives enough image resolution for obstacle detection while keeping processing and network transmission load low to meet FPS targets.
 
-### Communication
+### 6.3 Communication
 
 Wi‑Fi streaming was chosen as the communication medium primarily for convenience and out curiosity. The distance and a bounding box is drawn onto each wifi frame, marking the nearest object and its proximity. This seemed the easiest way to visualize and validate the obstacle detection in a browser during development and demonstrations. However it adds latency and can be unstable. The bandwitdth is litmited to 2.4 GHz, which limits the JPEG quality that can be transmitted. For later robot integration, a simple serial transmission of obstacle data (distance + object size/position) is recommended.
 
-## Results and System Performance
+## 7. Results and System Performance
 This section is divided in three parts; object detection performance, distance accuracy and Wi-Fi streaming performance, and evaluates the success critera in relation to each part.
 
-### Object detection Performance
+### 7.1 Object detection Performance
 
-#### Single Dark Object Detection
+#### 7.1.1 Single Dark Object Detection
 
 Current Status: Working
 
@@ -146,7 +146,7 @@ Selects the object closest to the center of the image, where the distance sensor
 
 _Dark object detection with distance measurement_
 
-#### Bright Object Detection
+#### 7.1.2 Bright Object Detection
 
 Current Status: Not supported. Not working.
 
@@ -161,7 +161,7 @@ Current Status: Not supported. Not working.
 
 _Bright object detection example_
 
-#### Multiple Objects
+#### 7.1.2 Multiple Objects
 
 Current Status: Works sometimes
 
@@ -171,22 +171,22 @@ _Live video demonstration of multiple object detection_
 
 **Issue**: The system struggles with stability when multiple objects are present. It frequently switches between different objects because the algorithm cannot accurately determine which object is actually closest - it only identifies which object is closest to the image center and dark relative to the background. When the camera moves or lighting conditions change slightly, the detected "closest" object switches unpredictably between the available targets. This creates an unstable detection that jumps between objects rather than consistently tracking the genuinely nearest obstacle.
 
-### Distance Measurement Accuracy
+### 7.2 Distance Measurement Accuracy
 
 **Limitation**: The camera has a single ToF distance sensor that measures distance at the center point only. This creates the illusion that the entire image has the same depth as the center point. While the distance reading is accurate when the closest object lies in the center, it might not precisely reflect the distance when the closest object it positioned elsewhere.
 
-#### Close Range Performance
+#### 7.2.1 Close Range Performance
 
 - **Minimum distance**: 40mm (4cm) as specified in the [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
 - **Issue**: Objects placed closer than 40mm cause distance readings to increase rather than decrease and are unreliable
 
-#### Long Range Performance
+#### 7.2.2 Long Range Performance
 
 - **Maximum range**: Up to 4m theoretically, limited to 2m in implementation
 - **Hardware limitation**: Performance degrades in low-light conditions per [VL53L1X datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)
 - **Algorithm limitation**: At longer distances, the blob detection algorithm struggles to accurately identify which detected object corresponds to the distance measurement from the center-point sensor
 
-### Streaming Performance
+### 7.3 Streaming Performance
 
 **Current Status**: The WiFi stream experiences intermittent lag that, while manageable, can impact user experience during real-time monitoring.
 
@@ -205,9 +205,9 @@ _Live video demonstration of multiple object detection_
 **Trade-off**: There's a balance between maintaining smooth streaming performance and preserving enough image quality for accurate object detection and analysis.
 
 
-## Prerequisites
+## 8. Prerequisites
 
-### 1. Hardware Requirements
+### 8.1 Hardware Requirements
 
 - [Arduino Pro Nicla Vision](https://store.arduino.cc/products/nicla-vision?srsltid=AfmBOopppHsPMesp0YKIOC7XfsJXBv7hgtYOzXum65FR8MvuUogarmM3)
 - USB micro-b cable for programming and power
@@ -218,7 +218,7 @@ _Live video demonstration of multiple object detection_
 
 _Arduino Pro Nicla Vision_
 
-### 2. Install OpenMV IDE
+### 8.2 Install OpenMV IDE
 
 Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor3aI8hPW_sCZ0YLRZqzcMkT7fHTG1KMVlt2jVWwqs6_waVNAJy) (Windows/Linux/Mac).
 
@@ -231,9 +231,9 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 3. It will prompt you to update firmware → install OpenMV firmware on the Nicla Vision
 4. Test by running an example: File → Examples → OpenMV → HelloWorld
 
-## How to Run
+## 9. How to Run
 
-### Without Wifi Streaming
+### 9.1 Without Wifi Streaming
 
 1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING` to False.
 2. Connect your Nicla Vision to the computer with a USB cable and hit play - it automatically starts object detection and the led turns green. The stream is shown in OpenMV.
@@ -241,7 +241,7 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 <img src="images/connected_pc_green.png" width="400" alt="Connected pc green">
 <img src="images/mug_stream.png" width="400" alt="Open mv stream">
 
-### With wifi streaming
+### 9.2 With wifi streaming
 
 1. Open `ttk8.py` in OpenMV IDE and modify these parameters. Ensure your wifi supports the 2.4 GHz band:
 
@@ -274,7 +274,7 @@ This is where the most problems occurred. See [Troubleshooting](#troubleshooting
 
      <img src="images/connected_wall.png" width="300" alt="Green wall">
 
-#### Troubleshooting Wifi Connection
+### 9.3 Troubleshooting Wifi Connection
 
 1. Test [with wifi streaming](#with-wifi-streaming), while having the camera connected to the computer. Then you can see the terminal output in OpenMV and use it for debugging.
 1. Check that your network supports the 2.4 GHz band.
@@ -285,13 +285,13 @@ This is where the most problems occurred. See [Troubleshooting](#troubleshooting
 1. If your browser blocks the HTTP stream (showing "Not Secure" warning), click "Advanced" on the security warning and select "Proceed to [IP address] (unsafe)". Your browser might have further restrictions, denying you access.
 
 
-## Tips n Tricks
+## 10. Tips n Tricks
 
 If you want to divide the code into multiple files using OpenMV, you will get include errors.
 
 To surpass this, you will need to move the files you want to include directly onto the Nicla Vision camera's internal storage drive (not your computer's drive). When the camera is connected via USB, it appears as a separate USB drive in your file explorer - copy the Python files you want include there.
 
-## Appendix / References
+## 11. Appendix / References
 
 - [Arduino Nicla Vision datasheet](https://docs.arduino.cc/hardware/nicla-vision/)
 - [Arduino Nicla Vision blob detection toturial](https://docs.arduino.cc/tutorials/nicla-vision/blob-detection/)
