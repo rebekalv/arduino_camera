@@ -9,8 +9,9 @@ This project implements a real-time obstacle detection system on an Arduino Nicl
 
 The algorithm worked reliably for single dark objects in many conditions. Support for bright-object detection was removed because of too many false positives (walls, windows, etc.). For multiple dark objects, the selection was unstable but functional in some cases. Distance measurements were accurate when the target was centered, and less accurate when off-center. The stream experienced some lag; trade-offs (grayscale, QVGA, JPEG quality) were applied to improve streaming responsiveness at the cost of image and detection accuracy.
 
-<img src="images/green.png" width="350" alt="Nicla vision green">
-<img src="images/mug_stream.png" width="550" alt="Stream Mug">
+<img src="images/green.png" width="300" alt="Nicla vision green">
+
+<img src="images/mug_stream.png" width="300" alt="Stream Mug">
 
 **Note:** Use the system only with proper consent and respect for privacy.
 
@@ -59,7 +60,12 @@ The algorithm worked reliably for single dark objects in many conditions. Suppor
    9.3 [Troubleshooting Wi‑Fi Connection](#93-troubleshooting-wi-fi-connection)
 
 10. [Tips & Tricks](#10-tips--tricks)
-11. [Appendix / References](#11-appendix--references)
+
+11. [Appendix](#11-appendix)
+   
+    11.1 [References](#111-references)
+
+    11.2 [Code](#112-code)
 
 ## 3. List of Abbreviations
 
@@ -117,14 +123,14 @@ The system consists of an integrated distance and camera sensor on the Nicla Vis
 _Detection system architecture_
 
 ### 6.2 Algorithm
-An algorithm had to be chosen for detecting obstacles and sending the information to a user or server. Blob detection was chosen because it is lightweight, fast and easy to tune for high‑contrast (dark) objects. It runs efficiently on the OpenMV / Nicla platform compared to heavier ML methods, which helps maintain real‑time FPS and reduces power use. Blob detection works by defining "dark" as the average background brightness plus an offset and grouping regions of similar luminance together into blobs. To handle changing lighting, the background brightness is recalculated every frame, improving reliability without complex preprocessing. 
+An algorithm had to be chosen for detecting obstacles and sending the information to a user or server. Blob detection was chosen because it is lightweight, fast and easy to tune for high‑contrast (dark) objects. It runs efficiently on the OpenMV / Nicla platform compared to heavier ML methods, which helps maintain real‑time FPS and reduces power use. Blob detection works by defining "dark" as the average background brightness plus an offset and grouping regions of similar luminance together into blobs. To handle changing lighting, the background brightness is recalculated every frame, improving reliability without complex preprocessing. The code for the blob detection algorithm is based on the [Arduino Nicla Vision blob detection tutorial](https://docs.arduino.cc/tutorials/nicla-vision/blob-detection/).
 
 When several blobs/obstacles are present, one has to be selected as the nearest, but there is no per-pixel depth available from the ToF sensor. The design solution is to select the blob closest to the image center, where the ToF distance sensor has its line-of-sight, and hence where the distance reading is most relevant.
 
 Having chosen blob detection further motivated using grayscale, because it reduces data size and preserves luminance contrast, which the blob detector uses. Processing grayscale frames is faster and requires less memory/CPU than color, improving real‑time performance on the Nicla Vision. QVGA (320×240) resolution was chosen as a compromise between spatial detail and throughput: it gives enough image resolution for obstacle detection while keeping processing and network transmission load low to meet FPS targets.
 
 ### 6.3 Communication
-Wi‑Fi streaming was chosen primarily for convenience and visualization. The distance and a bounding box are drawn onto each Wi‑Fi frame, marking the nearest object and its proximity. This is the easiest way to visualize and validate obstacle detection in a browser during development and demonstrations. However, it adds latency and can be unstable. The bandwidth is limited to 2.4 GHz, which affects the JPEG quality that can be transmitted. For robot integration, a simple serial transmission of obstacle data (distance + object size/position) is recommended.
+Wi‑Fi streaming was chosen primarily for convenience and visualization and is based on the [Arduino Nicla Vision Wi‑Fi streaming tutorial](https://docs.arduino.cc/tutorials/nicla-vision/live-streaming/). The measured distance and a bounding box are drawn onto each Wi‑Fi frame, marking the nearest object and its proximity. This is the easiest way to visualize and validate obstacle detection in a browser during development and demonstrations. However, it adds latency and can be unstable. The bandwidth is limited to 2.4 GHz, which affects the JPEG quality that can be transmitted. For robot integration, a simple serial transmission of obstacle data (distance + object size/position) is recommended.
 
 ## 7. Results and System Performance
 This section is divided into three parts: object detection performance, distance accuracy and Wi‑Fi streaming performance, and evaluates the success criteria in relation to each part.
@@ -219,8 +225,8 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download) (Windows / Lin
 1. Connect your Nicla Vision via USB to your computer.  
 2. Open the OpenMV IDE and connect the camera by clicking the plug icon (Ctrl+E). The play button turns green when connected.
 
-![Not connected](images/not_connected.png)  
-![Connected](images/connected.png)
+<img src="images/not_connected.png" width="150">
+<img src="images/connected.png" width="150">
 
 3. If prompted, update the firmware → install OpenMV firmware on the Nicla Vision.  
 4. Test by running an example: File → Examples → OpenMV → HelloWorld
@@ -233,7 +239,7 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download) (Windows / Lin
 2. Connect your Nicla Vision to the computer with a USB cable and hit play — it will start object detection and the LED turns green. The stream is shown in OpenMV.
 
 <img src="images/connected_pc_green.png" width="350" alt="Connected pc green">
-<img src="images/mug_stream.png" width="470" alt="Open mv stream">
+<img src="images/mug_stream.png" width="400" alt="Open mv stream">
 
 ### 9.2 With Wi‑Fi streaming
 
@@ -249,7 +255,7 @@ This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#9
 
 2. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (plug icon) and hit play. The LED turns blue during network setup.
 
-<img src="images/blue_connected.png" width="400" alt="Blue setup">
+<img src="images/blue_connected.png" width="500" alt="Blue setup">
 
 3. The terminal output will tell you to open a browser and access the stream at a certain IP and port. When this is done, the stream starts and the LED turns green.
 
@@ -265,8 +271,8 @@ This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#9
    - The camera will automatically connect to the specified network and the LED will be blue.  
    - Open a browser and navigate to the stream. The stream starts when a browser connects and the LED turns green.
    - View the live stream with obstacle detection.
-
-<img src="images/connected_wall.png" width="300" alt="Green wall">
+   
+  <img src="images/connected_wall.png" width="300" alt="Green wall">
 
 ### 9.3 Troubleshooting Wi‑Fi Connection
 
@@ -283,10 +289,188 @@ If you divide the code into multiple files in OpenMV, include errors may occur.
 
 To avoid this, copy the Python files you want to include directly onto the Nicla Vision camera's internal storage (when connected via USB it appears as a removable drive). Copy the files there so the camera can import them locally.
 
-## 11. Appendix / References
+## 11. Appendix
+
+### 11.1 References
 
 - [Arduino Nicla Vision datasheet](https://docs.arduino.cc/hardware/nicla-vision/)  
 - [Arduino Nicla Vision blob detection tutorial](https://docs.arduino.cc/tutorials/nicla-vision/blob-detection/)  
 - [Arduino Nicla Vision Wi‑Fi streaming tutorial](https://docs.arduino.cc/tutorials/nicla-vision/live-streaming/)  
 - [VL53L1X Datasheet](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)  
 - [OpenMV Documentation](https://docs.openmv.io/)
+
+### 11.2 Code
+
+```python
+import sensor, time, pyb
+from machine import I2C
+from vl53l1x import VL53L1X
+
+# Enable wifi
+WIFI_STREAMING = True # Set to False to disable wifi streaming
+WIFI_NAME = "Volvevegen_2G"
+WIFI_KEY = "Volvevegen"
+
+# Parameters BLOB DETECTION
+OFFSET = 30  # threshold offset around mean background brightness
+min_area = 300       # ignore tiny blobs
+min_pixels = 300     # ignore tiny blobs
+max_fraction = 0.95   # ignore blobs covering more than 90% of image (not working?)
+
+# Camera setup
+sensor.reset()
+sensor.set_pixformat(sensor.GRAYSCALE)  # grayscale for detection
+sensor.set_framesize(sensor.QVGA) # smaller frame size for speed
+sensor.skip_frames(time=500)
+
+# Distance sensor setup (ToF = time of flight)
+i2c = I2C(2)
+tof = VL53L1X(i2c)
+MIN_VALID_DISTANCE = 40  # mm
+MAX_VALID_DISTANCE = 2000 # mm
+
+# LEDs
+red = pyb.LED(1)
+green = pyb.LED(2) # streaming video
+blue = pyb.LED(3)  # setting up stream
+
+def leds_off():
+    red.off()
+    green.off()
+    blue.off()
+
+clock = time.clock()
+
+def wifi_setup(name, key): # returns wifi client
+    import network, socket
+
+    # User instructions
+    print('\n1. Activate a mobile hotspot or use wifi router')
+    print('2. If not activated: Set the band to be 2.4 GHz')
+    print('3. Change the wifi name and passkey parameters to match the wifi\n')
+
+    # WiFi connection parameters
+    HOST = ""
+    PORT = 8080
+
+    # Init wlan module and connect to network
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    wlan.connect(name, key)
+    # Set statisk IP: (IP, netmask, gateway, DNS)
+    #wlan.ifconfig(('192.168.2.30', '255.255.255.0', '192.168.2.1', '8.8.8.8'))
+
+    print('Trying to connect to network "{:s}"'.format(name))
+    print('with passkey "{:s}"\n'.format(key))
+
+    while not wlan.isconnected():
+        time.sleep(1)
+        print("Status:", wlan.status())
+
+    print("WiFi Connected\n")
+    print("Open a browser and enter http://{:s}:{:d}/ \n".format(wlan.ifconfig()[0], PORT))
+
+    # Create server socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+    s.bind([HOST, PORT])
+    s.listen(5)
+    s.setblocking(True)
+
+    print("Waiting for user connection...")
+    client, addr = s.accept()
+    client.settimeout(5.0)
+    print("Connected to " + addr[0] + ":" + str(addr[1]))
+
+    # Read request from client
+    data = client.recv(1024)
+
+    # Send multipart header
+    client.sendall(
+        "HTTP/1.1 200 OK\r\n"
+        "Server: OpenMV\r\n"
+        "Content-Type: multipart/x-mixed-replace;boundary=openmv\r\n"
+        "Cache-Control: no-cache\r\n"
+        "Pragma: no-cache\r\n\r\n"
+    )
+    return client
+
+def wifi_stream_frame(client, img):
+    # Convert to JPEG for streaming
+    cframe = img.to_jpeg(quality=35, copy=True)
+    header = (
+        "\r\n--openmv\r\n"
+        "Content-Type: image/jpeg\r\n"
+        "Content-Length:" + str(cframe.size()) + "\r\n\r\n"
+    )
+    client.sendall(header)
+    client.sendall(cframe)
+
+def detect_obstacles(wifi_client=None):
+    clock.tick()
+    img = sensor.snapshot()
+
+    ## DISTANCE SENSOR
+    dist = tof.read()  # Read distance in mm
+
+    # Dynamic background brightness
+    stats = img.get_statistics()
+    mean_val = stats.l_mean()
+    limit = max(0, mean_val - OFFSET)
+    color_thresholds = [(0, limit)]
+
+    # Find dark blobs
+    blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
+
+    if blobs and dist > MIN_VALID_DISTANCE and dist < MAX_VALID_DISTANCE:
+        # Center of the image (where ToF points)
+        center_x = img.width() // 2
+        center_y = img.height() // 2
+
+        # Filter blobs to ignore very large ones
+        max_pixels = int(img.width() * img.height() * max_fraction)
+        valid_blobs = [b for b in blobs if b.pixels() < max_pixels]
+
+        # Find the blob covering the distance sensor's line-of-sight (center)
+        target = None
+        for b in valid_blobs:
+            if b.pixels() < (img.width() * img.height() * max_fraction):
+                if b.x() <= center_x <= b.x()+b.w() and b.y() <= center_y <= b.y()+b.h():
+                    target = b
+                    break
+        if not target:
+            # If no blob covers the center, find the nearest blob
+            nearest = None
+            nearest_dist = float('inf')
+            for b in blobs:
+                # Calculate distance from blob center to image center
+                dx = b.cx() - center_x
+                dy = b.cy() - center_y
+                distance = (dx*dx + dy*dy)**0.5
+                if distance < nearest_dist:
+                    nearest = b
+                    nearest_dist = distance
+            target = nearest
+
+        if target:
+            # Draw target square and distance
+            img.draw_cross(target.cx(), target.cy(), color=(0, 255, 0))
+            img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
+            img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
+
+    ## WIFI STREAMING
+    if WIFI_STREAMING and wifi_client:
+        wifi_stream_frame(wifi_client, img)
+
+try:
+    blue.on()
+    wifi_client = (wifi_setup(WIFI_NAME, WIFI_KEY) if WIFI_STREAMING else None)
+    blue.off()
+    green.on()
+    print("Offset mm, Object width mm, Distance mm")
+    while True:
+        detect_obstacles(wifi_client)
+except:
+    leds_off()
+    print("\nProgram finished\n")
+```
