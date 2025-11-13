@@ -148,10 +148,11 @@ try:
     print("x offset mm, width mm, distance mm")
     while True:
         data = struct.pack('<hhh', *detect_obstacles()) # 2 bytes each
-        print(*struct.unpack('<hhh', data)) # print values, for testing
+        #print(*struct.unpack('<hhh', data)) # print values, for testing
         if(uart_request()):
             uart.write(data)
-            print('Data sent')
+            #print('Data sent')
+            print(*struct.unpack('<hhh', data)) # print values, for testing
         time.sleep_ms(100)
 
 except:
