@@ -11,7 +11,7 @@ The algorithm worked reliably for single dark objects in many conditions. The su
 
 
 <img src="images/green.png" width="350" alt="Nicla vision green">
-<img src="images/mug_stream.png" width="50" alt="Stream Mug">
+<img src="images/mug_stream.png" width="550" alt="Stream Mug">
 
 **Plot twist:** What started as an object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
 
@@ -233,8 +233,8 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download?srsltid=AfmBOor
 1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING` to False.
 2. Connect your Nicla Vision to the computer with a USB cable and hit play - it automatically starts object detection and the led turns green. The stream is shown in OpenMV.
 
-<img src="images/connected_pc_green.png" width="400" alt="Connected pc green">
-<img src="images/mug_stream.png" width="400" alt="Open mv stream">
+<img src="images/connected_pc_green.png" width="350" alt="Connected pc green">
+<img src="images/mug_stream.png" width="470" alt="Open mv stream">
 
 ### 9.2 With wifi streaming
 
