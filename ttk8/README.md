@@ -262,8 +262,8 @@ This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#9
 
 5. Disconnect the camera from the computer and connect it to a power source (outlet or battery).
 
-   - The camera will automatically connect to the specified network and the LED will be blue during connection.  
-   - Open a browser and navigate to the stream; the LED turns green when streaming. The stream starts when a browser connects.  
+   - The camera will automatically connect to the specified network and the LED will be blue.  
+   - Open a browser and navigate to the stream. The stream starts when a browser connects and the LED turns green.
    - View the live stream with obstacle detection.
 
 <img src="images/connected_wall.png" width="300" alt="Green wall">
