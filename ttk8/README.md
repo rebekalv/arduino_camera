@@ -4,7 +4,7 @@ Course: TTK8
 Year: 2025  
 Student: Rebekka Alve
 
-## Summary
+## 1. Summary
 This project implements a real-time obstacle detection system on an Arduino Nicla Vision using OpenMV firmware. It detects dark objects using blob detection and reads the distance from the integrated ToF sensor. The information is transmitted as camera frames over 2.4 GHz Wi-Fi, with an overlaying bounding box and distance on the frame, marking the closest obstacle.
 
 The algorithm worked reliably for single dark objects in many conditions. The support for bright objects was removed because of too many false positives (walls, windows, etc). For multiple dark objects, the selection was unstable, but working. The distance measured was accurate when the target was centered, and not as accurate if off-center. The stream had some lag and tradeoffs (grayscale, QVGA, JPEG quality) had to be done to improve streaming responsiveness at the cost of image and detection accuracy.
@@ -21,30 +21,51 @@ _Object detection on wifi stream_
 **Plot twist:** What started as an object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
 
 ## Table of Contents
-- [Summary](#summary)
-- [List of Abbreviations](#list-of-abbreviations)
-- [Future Improvements](#future-improvements)
-- [Success critera](#success-critera)
-- [Results and Features](#results-and-features)
-  - [Overview](#overview)
-  - [Algorithm](#algorithm)
-  - [Object detection Performance](#object-detection-performance)
-    - [Single Dark Object Detection](#single-dark-object-detection)
-    - [Bright Object Detection](#bright-object-detection)
-    - [Multiple Objects](#multiple-objects)
-  - [Distance Measurement Accuracy](#distance-measurement-accuracy)
-    - [Close Range Performance](#close-range-performance)
-    - [Long Range Performance](#long-range-performance)
-  - [Streaming Performance](#streaming-performance)
-- [Prerequisites](#prerequisites)
-  - [Hardware Requirements](#1-hardware-requirements)
-  - [Install OpenMV IDE](#2-install-openmv-ide)
-- [How to Run](#how-to-run)
-  - [Without Wifi Streaming](#without-wifi-streaming)
-  - [With wifi streaming](#with-wifi-streaming)
-  - [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
-- [Tips n Tricks](#tips-n-tricks)
-- [Appendix / References](#appendix--references)
+
+1. [Summary](#summary)
+2. [Table of Contents](#table-of-contents)
+2. [List of Abbreviations](#list-of-abbreviations)
+3. [Future Improvements](#future-improvements)
+4. [Success critera](#success-critera)
+5. [System Architecture](#system-architecture)
+
+   5.1 [Overview](#overview)
+
+   5.2 [Algorithm](#algorithm)
+   
+   5.3 [Communication](#communication)
+
+6. [Results and System Performance](#results-and-system-performance)
+   
+   6.1 [Object detection Performance](#object-detection-performance)
+       
+      - 6.1.1 [Single Dark Object Detection](#single-dark-object-detection)
+      - 6.1.2 [Bright Object Detection](#bright-object-detection)
+      - 6.1.3 [Multiple Objects](#multiple-objects)
+   
+   6.2 [Distance Measurement Accuracy](#distance-measurement-accuracy)
+       
+      - 6.2.1 [Close Range Performance](#close-range-performance)
+      - 6.2.2 [Long Range Performance](#long-range-performance)
+   
+   6.3 [Streaming Performance](#streaming-performance)
+
+7. [Prerequisites](#prerequisites)
+   
+   7.1 [Hardware Requirements](#1-hardware-requirements)
+   
+   7.2 [Install OpenMV IDE](#2-install-openmv-ide)
+
+8. [How to Run](#how-to-run)
+   
+   8.1 [Without Wifi Streaming](#without-wifi-streaming)
+   
+   8.2 [With wifi streaming](#with-wifi-streaming)
+   
+   8.3 [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
+
+9. [Tips n Tricks](#tips-n-tricks)
+10. [Appendix / References](#appendix--references)
 
 ## List of Abbreviations
 
