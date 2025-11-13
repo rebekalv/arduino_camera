@@ -11,38 +11,55 @@ The algorithm worked reliably for single dark objects in many conditions. The su
 
 
 <img src="images/green.png" width="350" alt="Nicla vision green">
-<img src="images/mug_stream.png" width="550" alt="Stream Mug">
+<img src="images/mug_stream.png" width="50" alt="Stream Mug">
 
 **Plot twist:** What started as an object detection project accidentally turned into a fully functional black-and-white home surveillance system. Please use responsibly and with proper consent.
 
 ## 2. Table of Contents
 
-1. [Summary](#1-summary)  
-2. [Table of Contents](#2-table-of-contents)  
-3. [List of Abbreviations](#3-list-of-abbreviations)  
-4. [Future Improvements](#4-future-improvements)  
-5. [Success critera](#5-success-critera)  
-6. [System Architecture](#6-system-architecture)  
-   - [Overview](#61-overview)  
-   - [Algorithm](#62-algorithm)  
-   - [Communication](#63-communication)  
-7. [Results and System Performance](#7-results-and-system-performance)  
-   - [Object detection Performance](#71-object-detection-performance)  
-     - [Single Dark Object Detection](#711-single-dark-object-detection)  
-     - [Bright Object Detection](#712-bright-object-detection)  
-     - [Multiple Objects](#713-multiple-objects)  
-   - [Distance Measurement Accuracy](#72-distance-measurement-accuracy)  
-     - [Close Range Performance](#721-close-range-performance)  
-     - [Long Range Performance](#722-long-range-performance)  
-   - [Streaming Performance](#73-wi-fi-streaming-performance)  
-8. [Prerequisites](#8-prerequisites)  
-   - [Hardware Requirements](#81-hardware-requirements)  
-   - [Install OpenMV IDE](#82-install-openmv-ide)  
-9. [How to Run](#9-how-to-run)  
-   - [Without Wifi Streaming](#91-without-wi-fi-streaming)  
-   - [With wifi streaming](#92-with-wi-fi-streaming)  
-   - [Troubleshooting Wifi Connection](#93-troubleshooting-wi-fi-connection)  
-10. [Tips n Tricks](#10-tips-n-tricks)  
+1. [Summary](#1-summary)
+2. [Table of Contents](#2-table-of-contents)
+3. [List of Abbreviations](#3-list-of-abbreviations)
+4. [Future Improvements](#4-future-improvements)
+5. [Success critera](#5-success-critera)
+6. [System Architecture](#6-system-architecture)
+
+   6.1 [Overview](#61-overview)
+
+   6.2 [Algorithm](#62-algorithm)
+   
+   6.3 [Communication](#63-communication)
+
+7. [Results and System Performance](#7-results-and-system-performance)
+   
+   7.1 [Object detection Performance](#71-object-detection-performance)
+       
+      - 7.1.1 [Single Dark Object Detection](#711-single-dark-object-detection)
+      - 7.1.2 [Bright Object Detection](#712-bright-object-detection)
+      - 7.1.3 [Multiple Objects](#713-multiple-objects)
+   
+   7.2 [Distance Measurement Accuracy](#72-distance-measurement-accuracy)
+       
+      - 7.2.1 [Close Range Performance](#721-close-range-performance)
+      - 7.2.2 [Long Range Performance](#722-long-range-performance)
+   
+   7.3 [Streaming Performance](#73-streaming-performance)
+
+8. [Prerequisites](#8-prerequisites)
+   
+   8.1 [Hardware Requirements](#81-hardware-requirements)
+   
+   8.2 [Install OpenMV IDE](#82-install-openmv-ide)
+
+9. [How to Run](#9-how-to-run)
+   
+   9.1 [Without Wifi Streaming](#91-without-wifi-streaming)
+   
+   9.2 [With wifi streaming](#92-with-wifi-streaming)
+   
+   9.3 [Troubleshooting Wifi Connection](#93-troubleshooting-wifi-connection)
+
+10. [Tips n Tricks](#10-tips-n-tricks)
 11. [Appendix / References](#11-appendix--references)
 
 ## 3. List of Abbreviations
