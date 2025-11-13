@@ -1,35 +1,42 @@
-#define UARTE1_PRESENT = 1
 #include <sdk_config.h>
 #include "nrfx.h"     
 #include "nrfx_uarte.h"
-//#include "nrf_delay.h"
+#include "nrf_delay.h"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
-//#include "nrf_drv_gpiote.h"
-//#include "nrf_gpiote.h"
-//#include "nrf_gpio.h"
 
-// UART
-#define UARTE_TX_PIN 6   // adjust to your board
-#define UARTE_RX_PIN 8
+// UARTE
+#define P1 32
+#define UARTE_TX_PIN (P1+2)  // P1.02
+#define UARTE_RX_PIN (P1+1)  // P1.01
 #define UARTE_BAUDRATE NRF_UARTE_BAUDRATE_115200
 #define RX_DATA_LENGTH 6
+#define UARTE_TIMEOUT_MS 100
 
 static const nrfx_uarte_t uarte1 = NRFX_UARTE_INSTANCE(1);
-
-uint8_t gpiote_rx_counter = 0;
-bool rx_data_available = false;
+static uint8_t rx_buffer[RX_DATA_LENGTH];
+static bool rx_done = false;
+static bool tx_done = false;
 
 void uarte1_event_handler(nrfx_uarte_event_t const * p_event, void * p_context)
 {
-    if (p_event->type == NRFX_UARTE_EVT_RX_DONE)
+    switch (p_event->type)
     {
-        // handle received data
+        case NRFX_UARTE_EVT_TX_DONE:
+            tx_done = true;
+            NRF_LOG_INFO("Sent request");
+            NRF_LOG_FLUSH();
+            break;
+        case NRFX_UARTE_EVT_RX_DONE:
+            rx_done = true;
+            break;
+        default:
+            break;
     }
 }
 
-void uart1_init(void)
+void uarte1_init(void)
 {
     nrfx_uarte_config_t  config = NRFX_UARTE_DEFAULT_CONFIG;
     config.pseltxd = UARTE_TX_PIN;
@@ -43,83 +50,63 @@ void uart1_init(void)
     NRF_LOG_FLUSH();
 }
 
-/*
-
-void rx_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
+void uarte1_request_data(void)
 {
-        rx_data_available = true;
-
+    // Send request
+    tx_done = false;
+    uint8_t request_byte = 'r';
+    APP_ERROR_CHECK(nrfx_uarte_tx(&uarte1, &request_byte, 1));
 }
 
-void rx_interrupt_init(void)
+bool uarte1_receive_data(void)
 {
-    nrf_drv_gpiote_init();
+    rx_done = false;
+    APP_ERROR_CHECK(nrfx_uarte_rx(&uarte1, rx_buffer, RX_DATA_LENGTH));
 
-    nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_HITOLO(true);  
-    in_config.pull = NRF_GPIO_PIN_PULLUP;
-
-    APP_ERROR_CHECK(nrf_drv_gpiote_in_init(UART_RX_PIN, &in_config, rx_handler));
-    nrf_drv_gpiote_in_event_enable(UART_RX_PIN, true);
-
+    // Wait for RX with timeout
+    uint32_t start_ms = 0;
+    while (!rx_done)
+    {
+        __WFE(); // wait for events
+        start_ms += 1; // approximate 1 ms per loop
+        if (start_ms >= UARTE_TIMEOUT_MS)
+        {
+            NRF_LOG_WARNING("RX timeout, no response from camera");
+            NRF_LOG_FLUSH();
+            return false;
+        }
+    }
+    return true;
 }
 
-void system_init(void)
+int uarte1_get_line_estimate()
+{
+  uarte1_request_data();
+
+  if(uarte1_receive_data())
+  {
+    int16_t x_start_mm = rx_buffer[0] | (rx_buffer[1] << 8);
+    int16_t x_width_mm = rx_buffer[2] | (rx_buffer[3] << 8);
+    int16_t distance_mm = rx_buffer[4] | (rx_buffer[5] << 8);
+
+     NRF_LOG_INFO("x_start_mm: %d, x_width_mm: %d, distance_mm: %d", x_start_mm, x_width_mm, distance_mm);
+     NRF_LOG_FLUSH();
+  }
+}
+
+int main(void)
 {
     APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 
-    uart_init();
-
-    rx_interrupt_init();
-}
-
-void uart_request_data(void)
-{
-    uint8_t request_byte = 'r';
-    ret_code_t err = nrf_drv_uart_tx(&uart, &request_byte, 1);
-}
-
-bool uart_receive_data(uint8_t *camera_data, size_t length)
-{
-    ret_code_t err = nrf_drv_uart_rx(&uart, camera_data, length);
-    return (err == NRF_SUCCESS);
-}
-
-*/
-
-int main(void)
-{
-    //system_init();
-    //uint8_t camera_data[6];
-
-    uart1_init();
+    uarte1_init();
 
     while (true)
     {
-    /*
-        uart_request_data();
-
-        if(rx_data_available)
-        {
-          if (uart_receive_data(camera_data, 6))
-          {
-              uint16_t x_start = camera_data[0] | (camera_data[1] << 8);
-              uint16_t x_end = camera_data[2] | (camera_data[3] << 8);
-              uint16_t distance_cm = camera_data[4] | (camera_data[5] << 8);
-
-              NRF_LOG_INFO("x_start: %d, x_end: %d, distance: %d", x_start, x_end, distance_cm);
-              NRF_LOG_FLUSH();
-
-              rx_data_available = false;
-          }
-        }else{
-          NRF_LOG_INFO("Camera not responding");
-          NRF_LOG_FLUSH();
-        }
-      
+    
         
-        nrf_delay_ms(1000);  // request periodically
-        */
+
+        nrf_delay_ms(1000); // delay between requests
     }
 }
 
