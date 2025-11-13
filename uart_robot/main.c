@@ -14,6 +14,12 @@
 #define RX_DATA_LENGTH 6
 #define UARTE_TIMEOUT_MS 100
 
+typedef struct {
+    int16_t x_start_mm;
+    int16_t x_width_mm;
+    int16_t distance_mm;
+} CameraLineEstimate;
+
 static const nrfx_uarte_t uarte1 = NRFX_UARTE_INSTANCE(1);
 static uint8_t rx_buffer[RX_DATA_LENGTH];
 static bool rx_done = false;
@@ -79,19 +85,16 @@ bool uarte1_receive_data(void)
     return true;
 }
 
-int uarte1_get_line_estimate()
-{
-  uarte1_request_data();
+CameraLineEstimate uarte1_get_line_estimate() {
+    CameraLineEstimate result = {0};
+    uarte1_request_data();
 
-  if(uarte1_receive_data())
-  {
-    int16_t x_start_mm = rx_buffer[0] | (rx_buffer[1] << 8);
-    int16_t x_width_mm = rx_buffer[2] | (rx_buffer[3] << 8);
-    int16_t distance_mm = rx_buffer[4] | (rx_buffer[5] << 8);
-
-     NRF_LOG_INFO("x_start_mm: %d, x_width_mm: %d, distance_mm: %d", x_start_mm, x_width_mm, distance_mm);
-     NRF_LOG_FLUSH();
-  }
+    if (uarte1_receive_data()) {
+        result.x_start_mm = rx_buffer[0] | (rx_buffer[1] << 8);
+        result.x_width_mm = rx_buffer[2] | (rx_buffer[3] << 8);
+        result.distance_mm = rx_buffer[4] | (rx_buffer[5] << 8);
+    }
+    return result;
 }
 
 int main(void)
@@ -104,8 +107,12 @@ int main(void)
     while (true)
     {
     
-        
+        CameraLineEstimate estimate = uarte1_get_line_estimate();
 
+        // For debugging:
+        NRF_LOG_INFO("x_start_mm: %d, x_width_mm: %d, distance_mm: %d", 
+                      estimate.x_start_mm, estimate.x_width_mm, estimate.distance_mm);
+        NRF_LOG_FLUSH();
         nrf_delay_ms(1000); // delay between requests
     }
 }
