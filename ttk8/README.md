@@ -24,48 +24,48 @@ _Object detection on wifi stream_
 
 1. [Summary](#summary)
 2. [Table of Contents](#table-of-contents)
-2. [List of Abbreviations](#list-of-abbreviations)
-3. [Future Improvements](#future-improvements)
-4. [Success critera](#success-critera)
-5. [System Architecture](#system-architecture)
+3. [List of Abbreviations](#list-of-abbreviations)
+4. [Future Improvements](#future-improvements)
+5. [Success critera](#success-critera)
+6. [System Architecture](#system-architecture)
 
-   5.1 [Overview](#overview)
+   6.1 [Overview](#overview)
 
-   5.2 [Algorithm](#algorithm)
+   6.2 [Algorithm](#algorithm)
    
-   5.3 [Communication](#communication)
+   6.3 [Communication](#communication)
 
-6. [Results and System Performance](#results-and-system-performance)
+7. [Results and System Performance](#results-and-system-performance)
    
-   6.1 [Object detection Performance](#object-detection-performance)
+   7.1 [Object detection Performance](#object-detection-performance)
        
-      - 6.1.1 [Single Dark Object Detection](#single-dark-object-detection)
-      - 6.1.2 [Bright Object Detection](#bright-object-detection)
-      - 6.1.3 [Multiple Objects](#multiple-objects)
+      - 7.1.1 [Single Dark Object Detection](#single-dark-object-detection)
+      - 7.1.2 [Bright Object Detection](#bright-object-detection)
+      - 7.1.3 [Multiple Objects](#multiple-objects)
    
-   6.2 [Distance Measurement Accuracy](#distance-measurement-accuracy)
+   7.2 [Distance Measurement Accuracy](#distance-measurement-accuracy)
        
-      - 6.2.1 [Close Range Performance](#close-range-performance)
-      - 6.2.2 [Long Range Performance](#long-range-performance)
+      - 7.2.1 [Close Range Performance](#close-range-performance)
+      - 7.2.2 [Long Range Performance](#long-range-performance)
    
-   6.3 [Streaming Performance](#streaming-performance)
+   7.3 [Streaming Performance](#streaming-performance)
 
-7. [Prerequisites](#prerequisites)
+8. [Prerequisites](#prerequisites)
    
-   7.1 [Hardware Requirements](#1-hardware-requirements)
+   8.1 [Hardware Requirements](#1-hardware-requirements)
    
-   7.2 [Install OpenMV IDE](#2-install-openmv-ide)
+   8.2 [Install OpenMV IDE](#2-install-openmv-ide)
 
-8. [How to Run](#how-to-run)
+9. [How to Run](#how-to-run)
    
-   8.1 [Without Wifi Streaming](#without-wifi-streaming)
+   9.1 [Without Wifi Streaming](#without-wifi-streaming)
    
-   8.2 [With wifi streaming](#with-wifi-streaming)
+   9.2 [With wifi streaming](#with-wifi-streaming)
    
-   8.3 [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
+   9.3 [Troubleshooting Wifi Connection](#troubleshooting-wifi-connection)
 
-9. [Tips n Tricks](#tips-n-tricks)
-10. [Appendix / References](#appendix--references)
+10. [Tips n Tricks](#tips-n-tricks)
+11. [Appendix / References](#appendix--references)
 
 ## List of Abbreviations
 
