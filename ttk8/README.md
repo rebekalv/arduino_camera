@@ -148,7 +148,7 @@ Current Status: Not supported.
 **Issue**: The system focuses on dark objects. In the example image below, light-coloured glasses are placed in front of a dark chair, but the algorithm identifies the chair as the closest obstacle because:
 
 - It prioritizes dark regions
-- The chair is closer to the image center (where the distance sensor is most accurate)
+- The chair is closer to the image center (where the distance sensor is most accurate) than the dark plant.
 
 **Design Decision**: Earlier code versions included a toggle between dark and bright object detection. However, bright-object detection frequently misidentified walls, windows and background elements as targets. To improve reliability, the feature was removed and the system now focuses on dark object detection.
 
