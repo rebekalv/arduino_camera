@@ -12,7 +12,7 @@
 #define UARTE_RX_PIN (P1+1)  // P1.01
 #define UARTE_BAUDRATE NRF_UARTE_BAUDRATE_115200
 #define RX_DATA_LENGTH 6
-#define UARTE_TIMEOUT_MS 100
+#define UARTE_TIMEOUT_MS 100 // 5 for debugging, else 100
 
 typedef struct {
     int16_t x_start_mm;
