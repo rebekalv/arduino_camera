@@ -62,8 +62,6 @@
     </folder>
     <folder Name="nRF_Drivers">
       <file file_name="nrfx_atomic.c" />
-      <file file_name="nrfx_prs.c" />
-      <file file_name="nrfx_uart.c" />
       <file file_name="nrfx_uarte.c" />
     </folder>
     <folder Name="Application">
@@ -85,7 +83,7 @@
       build_output_file_name="$(OutDir)/$(ProjectName)$(EXE)"
       c_preprocessor_definitions=""
       c_system_include_directories="$(StudioIncDir:$(StudioDir)/include)"
-      c_user_include_directories="../SDK/components/libraries/delay;../SDK/components/libraries/util;../SDK/components/libraries/memobj;../SDK/components/libraries/balloc;../SDK/components/libraries/strerror;../SDK/components/libraries/ringbuf;../SDK/components/libraries/atomic;../SDK/components/libraries/gpiote;../SDK/components/libraries/experimental_section_vars/;../SDK/modules/nrfx;../SDK/modules/nrfx/drivers/include;../SDK/modules/nrfx/hal;../SDK/modules/nrfx/mdk;../SDK/integration/nrfx;../SDK/integration/nrfx/legacy;../SDK/modules/nrfx/soc;../SDK/modules/nrfx/drivers/src;../SDK/modules/nrfx/drivers/src/prs;../SDK/examples/peripheral/twi_scanner/pca10056/blank/config;../SDK/components/libraries/log;../SDK/components/libraries/log/src;../SDK/components/softdevice/s140/headers;../SDK/components/softdevice/common/headers;../SDK/components/boards;../SDK/components/drivers_nrf/gpiote;../SDK/components/drivers_nrf/uart;../SDK/components/toolchain/cmsis/include;../SDK/external/fprintf;../SDK/external/segger_rtt" />
+      c_user_include_directories="$(ProjectDir);../SDK/components/libraries/delay;../SDK/components/libraries/util;../SDK/components/libraries/memobj;../SDK/components/libraries/balloc;../SDK/components/libraries/strerror;../SDK/components/libraries/ringbuf;../SDK/components/libraries/atomic;../SDK/components/libraries/experimental_section_vars/;../SDK/modules/nrfx;../SDK/modules/nrfx/drivers/include;../SDK/modules/nrfx/hal;../SDK/modules/nrfx/mdk;../SDK/integration/nrfx;../SDK/integration/nrfx/legacy;../SDK/modules/nrfx/soc;../SDK/modules/nrfx/drivers/src;../SDK/modules/nrfx/drivers/src/prs;../SDK/components/libraries/log;../SDK/components/libraries/log/src;../SDK/components/softdevice/s140/headers;../SDK/components/softdevice/common/headers;../SDK/components/boards;../SDK/components/drivers_nrf/uart;../SDK/components/toolchain/cmsis/include;../SDK/external/fprintf;../SDK/external/segger_rtt" />
   </project>
   <configuration
     Name="Release"
