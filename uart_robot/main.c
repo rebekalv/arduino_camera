@@ -8,8 +8,8 @@
 
 // UARTE
 #define P1 32
-#define UARTE_TX_PIN (P1+2)  // P1.02
-#define UARTE_RX_PIN (P1+1)  // P1.01
+#define UARTE_TX_PIN (12)  // P1.02
+#define UARTE_RX_PIN (11)  // P1.01
 #define UARTE_BAUDRATE NRF_UARTE_BAUDRATE_115200
 #define RX_DATA_LENGTH 6
 #define UARTE_TIMEOUT_MS 100 // 5 for debugging, else 100
