@@ -77,6 +77,8 @@ bool uarte1_receive_data(void)
         start_ms += 1; // approximate 1 ms per loop
         if (start_ms >= UARTE_TIMEOUT_MS)
         {
+            nrfx_uarte_rx_abort(&uarte1);
+            nrfx_uarte_tx_abort(&uarte1);
             NRF_LOG_WARNING("RX timeout, no response from camera");
             NRF_LOG_FLUSH();
             return false;
@@ -85,7 +87,7 @@ bool uarte1_receive_data(void)
     return true;
 }
 
-CameraLineEstimate uarte1_get_line_estimate() {
+CameraLineEstimate uarte1_get_line_estimate(void) {
     CameraLineEstimate result = {0};
     uarte1_request_data();
 
