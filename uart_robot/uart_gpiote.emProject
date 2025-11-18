@@ -38,7 +38,6 @@
     <folder Name="nRF_Log">
       <file file_name="nrf_log_backend_rtt.c" />
       <file file_name="nrf_log_backend_serial.c" />
-      <file file_name="nrf_log_backend_uart.c" />
       <file file_name="nrf_log_default_backends.c" />
       <file file_name="nrf_log_frontend.c" />
       <file file_name="nrf_log_str_formatter.c" />
