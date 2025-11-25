@@ -9,9 +9,9 @@ This project implements a real-time obstacle detection system on an Arduino Nicl
 
 The algorithm worked reliably for single dark objects in many conditions. Support for bright-object detection was removed because of too many false positives (walls, windows, etc.). For multiple dark objects, the selection was unstable but functional in some cases. Distance measurements were accurate when the target was centered, and less accurate when off-center. The stream experienced some lag; trade-offs (grayscale, QVGA, JPEG quality) were applied to improve streaming responsiveness at the cost of image and detection accuracy.
 
-<img src="images/green.png" width="300" alt="Nicla vision green">
+<img src="ttk8/images/green.png" width="300" alt="Nicla vision green">
 
-<img src="images/mug_stream.png" width="300" alt="Stream Mug">
+<img src="ttk8/images/mug_stream.png" width="300" alt="Stream Mug">
 
 **Note:** Use the system only with proper consent and respect for privacy.
 
@@ -143,7 +143,7 @@ Current Status: Working
 
 Selects the object closest to the center of the image, where the distance sensor is the most accurate.
 
-<img src="images/detect_plant.png" width="400" alt="Dark Object Detection">
+<img src="ttk8/images/detect_plant.png" width="400" alt="Dark Object Detection">
 
 _Dark object detection with distance measurement_
 
@@ -158,7 +158,7 @@ Current Status: Not supported.
 
 **Design Decision**: Earlier code versions included a toggle between dark and bright object detection. However, bright-object detection frequently misidentified walls, windows and background elements as targets. To improve reliability, the feature was removed and the system now focuses on dark object detection.
 
-<img src="images/chair_glass.png" width="400" alt="Bright Object Detection">
+<img src="ttk8/images/chair_glass.png" width="400" alt="Bright Object Detection">
 
 _Bright object detection example_
 
@@ -166,7 +166,7 @@ _Bright object detection example_
 
 Current Status: Partial
 
-<img src="images/short_multiple_video.gif" width="400" alt="Multiple Objects Video Demo">
+<img src="ttk8/images/short_multiple_video.gif" width="400" alt="Multiple Objects Video Demo">
 
 _Live video demonstration of multiple object detection_
 
@@ -199,7 +199,7 @@ _Live video demonstration of multiple object detection_
 
 **Optimization Strategy**:
 
-- **Grayscale format**: Reduces data size compared to color images.  
+- **Grayscale format**: Reduces data size compared to color ttk8/images.  
 - **QVGA resolution**: Lowers processing and transmission load.  
 - **Reduced JPEG quality**: Balances stream responsiveness with visual clarity.
 
@@ -214,7 +214,7 @@ _Live video demonstration of multiple object detection_
 - Wi‑Fi network with 2.4 GHz band for streaming  
 - Computer (Windows / Linux / Mac)
 
-<img src="images/niclavision.png" width="400" alt="Hardware Setup">
+<img src="ttk8/images/niclavision.png" width="400" alt="Hardware Setup">
 
 _Arduino Pro Nicla Vision_
 
@@ -225,8 +225,8 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download) (Windows / Lin
 1. Connect your Nicla Vision via USB to your computer.  
 2. Open the OpenMV IDE and connect the camera by clicking the plug icon (Ctrl+E). The play button turns green when connected.
 
-<img src="images/not_connected.png" width="150">
-<img src="images/connected.png" width="150">
+<img src="ttk8/images/not_connected.png" width="150">
+<img src="ttk8/images/connected.png" width="150">
 
 3. If prompted, update the firmware → install OpenMV firmware on the Nicla Vision.  
 4. Test by running an example: File → Examples → OpenMV → HelloWorld
@@ -238,8 +238,8 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download) (Windows / Lin
 1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING = False`.  
 2. Connect your Nicla Vision to the computer with a USB cable and hit play — it will start object detection and the LED turns green. The stream is shown in OpenMV.
 
-<img src="images/connected_pc_green.png" width="350" alt="Connected pc green">
-<img src="images/mug_stream.png" width="400" alt="Open mv stream">
+<img src="ttk8/images/connected_pc_green.png" width="350" alt="Connected pc green">
+<img src="ttk8/images/mug_stream.png" width="400" alt="Open mv stream">
 
 ### 9.2 With Wi‑Fi streaming
 
@@ -255,16 +255,16 @@ This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#9
 
 2. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (plug icon) and hit play. The LED turns blue during network setup.
 
-<img src="images/blue_connected.png" width="500" alt="Blue setup">
+<img src="ttk8/images/blue_connected.png" width="500" alt="Blue setup">
 
 3. The terminal output will tell you to open a browser and access the stream at a certain IP and port. When this is done, the stream starts and the LED turns green.
 
-<img src="images/terminal.png" width="500" alt="Terminal">
-<img src="images/browser_stream.png" width="500" alt="Browser stream">
+<img src="ttk8/images/terminal.png" width="500" alt="Terminal">
+<img src="ttk8/images/browser_stream.png" width="500" alt="Browser stream">
 
 4. When the stream works, upload the code to the Nicla Vision: Tools → Save open script to OpenMV Cam.
 
-<img src="images/save_script.png" width="400" alt="Save script">
+<img src="ttk8/images/save_script.png" width="400" alt="Save script">
 
 5. Disconnect the camera from the computer and connect it to a power source (outlet or battery).
 
@@ -272,7 +272,7 @@ This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#9
    - Open a browser and navigate to the stream. The stream starts when a browser connects and the LED turns green.
    - View the live stream with obstacle detection.
    
-  <img src="images/connected_wall.png" width="300" alt="Green wall">
+  <img src="ttk8/images/connected_wall.png" width="300" alt="Green wall">
 
 ### 9.3 Troubleshooting Wi‑Fi Connection
 
