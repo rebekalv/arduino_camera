@@ -91,7 +91,7 @@ The Nicla Vision camera is intended to be mounted on a mobile robot in a larger 
 
 For future development, sending only obstacle info (distance and size/position) over serial communication is recommended, as streaming can lag and is vulnerable to unstable Wi‑Fi.
 
-<img src="diagrams/kontekstDiagramCropped.png" width="750" alt="Context Diagram">
+<img src="ttk8/diagrams/kontekstDiagramCropped.png" width="750" alt="Context Diagram">
 
 ## 5. Success criteria
 
@@ -118,7 +118,7 @@ For future development, sending only obstacle info (distance and size/position) 
 ### 6.1 Overview
 The system consists of an integrated distance and camera sensor on the Nicla Vision, which executes the object detection algorithm locally. Results are sent over the connected Wi‑Fi to a specified port and IP address.
 
-<img src="diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
+<img src="ttk8/diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
 
 _Detection system architecture_
 
