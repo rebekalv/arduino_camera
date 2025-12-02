@@ -4,8 +4,8 @@ from vl53l1x import VL53L1X
 
 # Enable wifi
 WIFI_STREAMING = True # Set to False to disable wifi streaming
-WIFI_NAME = "Volvevegen_2G"
-WIFI_KEY = "Volvevegen"
+WIFI_NAME = "REBEKALV"
+WIFI_KEY = "DetteErPassord"
 
 # Parameters BLOB DETECTION
 OFFSET = 30  # threshold offset around mean background brightness
@@ -53,8 +53,8 @@ def wifi_setup(name, key): # returns wifi client
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     wlan.connect(name, key)
-    # Set statisk IP: (IP, netmask, gateway, DNS)
-    #wlan.ifconfig(('192.168.2.30', '255.255.255.0', '192.168.2.1', '8.8.8.8'))
+    # Set static IP: (IP, netmask, gateway, DNS)
+    #wlan.ifconfig(('192.168.137.213', '255.255.255.0', '192.168.137.1', '8.8.8.8'))
 
     print('Trying to connect to network "{:s}"'.format(name))
     print('with passkey "{:s}"\n'.format(key))
@@ -163,7 +163,6 @@ try:
     wifi_client = (wifi_setup(WIFI_NAME, WIFI_KEY) if WIFI_STREAMING else None)
     blue.off()
     green.on()
-    print("Offset mm, Object width mm, Distance mm")
     while True:
         detect_obstacles(wifi_client)
 except:
