@@ -53,11 +53,11 @@ The algorithm worked reliably for single dark objects in many conditions. Suppor
 
 9. [How to Run](#9-how-to-run)
    
-   9.1 [Without Wi‑Fi Streaming](#91-without-wi-fi-streaming)
+   9.1 [Without Wi‑Fi Streaming](#91-without-wifi-streaming)
    
-   9.2 [With Wi‑Fi streaming](#92-with-wi-fi-streaming)
+   9.2 [With Wi‑Fi streaming](#92-with-wifi-streaming)
    
-   9.3 [Troubleshooting Wi‑Fi Connection](#93-troubleshooting-wi-fi-connection)
+   9.3 [Troubleshooting Wi‑Fi Connection](#93-troubleshooting-wifi-connection)
 
 10. [Tips & Tricks](#10-tips--tricks)
 
@@ -91,7 +91,7 @@ The Nicla Vision camera is intended to be mounted on a mobile robot in a larger 
 
 For future development, sending only obstacle info (distance and size/position) over serial communication is recommended, as streaming can lag and is vulnerable to unstable Wi‑Fi.
 
-<img src="ttk8/diagrams/kontekstDiagramCropped.png" width="750" alt="Context Diagram">
+<img src="diagrams/kontekstDiagramCropped.png" width="750" alt="Context Diagram">
 
 ## 5. Success criteria
 
@@ -118,7 +118,7 @@ For future development, sending only obstacle info (distance and size/position) 
 ### 6.1 Overview
 The system consists of an integrated distance and camera sensor on the Nicla Vision, which executes the object detection algorithm locally. Results are sent over the connected Wi‑Fi to a specified port and IP address.
 
-<img src="ttk8/diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
+<img src="diagrams/innerAnalysis.png" width="500" alt="Nicla vision analysis">
 
 _Detection system architecture_
 
@@ -233,7 +233,7 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download) (Windows / Lin
 
 ## 9. How to Run
 
-### 9.1 Without Wi‑Fi Streaming
+### 9.1 Without WiFi Streaming
 
 1. Open `ttk8.py` in OpenMV IDE and set `ENABLE_WIFI_STREAMING = False`.  
 2. Connect your Nicla Vision to the computer with a USB cable and hit play — it will start object detection and the LED turns green. The stream is shown in OpenMV.
@@ -241,7 +241,7 @@ Download & install [OpenMV IDE](https://openmv.io/pages/download) (Windows / Lin
 <img src="ttk8/images/connected_pc_green.png" width="350" alt="Connected pc green">
 <img src="ttk8/images/mug_stream.png" width="400" alt="Open mv stream">
 
-### 9.2 With Wi‑Fi streaming
+### 9.2 With WiFi streaming
 
 1. Open `ttk8.py` in OpenMV IDE and modify these parameters. Ensure your Wi‑Fi supports the 2.4 GHz band:
 
@@ -251,7 +251,7 @@ WIFI_NAME = "your_network_name"
 WIFI_KEY = "your_password"
 ```
 
-This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#93-troubleshooting-wi-fi-connection) for solutions.
+This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#93-troubleshooting-wifi-connection) for solutions.
 
 2. Connect your Nicla Vision to the computer with a USB cable. In the OpenMV IDE click connect (plug icon) and hit play. The LED turns blue during network setup.
 
@@ -262,11 +262,20 @@ This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#9
 <img src="ttk8/images/terminal.png" width="500" alt="Terminal">
 <img src="ttk8/images/browser_stream.png" width="500" alt="Browser stream">
 
-4. When the stream works, upload the code to the Nicla Vision: Tools → Save open script to OpenMV Cam.
+4. When the stream works, uncomment ``wlan.ifconfig`` and match its IP and Gateway with the connection printed the terminal. This sets the IP to be static, so that the web-browser link does not change. In the image of the terminal below, red marks the IP and yellow marks the gateway. Netmask and DNS can remain unchanged.
+
+```python
+# Set static IP: (IP, netmask, gateway, DNS)
+wlan.ifconfig(('192.168.137.213', '255.255.255.0', '192.168.137.1', '8.8.8.8'))
+```
+
+<img src="ttk8/images/ip_and_gateway.png" width="500" alt="Ip and gateway">
+
+5. When the stream works, upload the code to the Nicla Vision: Tools → Save open script to OpenMV Cam.
 
 <img src="ttk8/images/save_script.png" width="400" alt="Save script">
 
-5. Disconnect the camera from the computer and connect it to a power source (outlet or battery).
+6. Disconnect the camera from the computer and connect it to a power source (outlet or battery).
 
    - The camera will automatically connect to the specified network and the LED will be blue.  
    - Open a browser and navigate to the stream. The stream starts when a browser connects and the LED turns green.
@@ -274,7 +283,7 @@ This is where most issues occur. See [9.3 Troubleshooting Wi‑Fi Connection](#9
    
   <img src="ttk8/images/connected_wall.png" width="300" alt="Green wall">
 
-### 9.3 Troubleshooting Wi‑Fi Connection
+### 9.3 Troubleshooting WiFi Connection
 
 1. Test Wi‑Fi streaming while the camera is connected to the computer so you can see terminal output in OpenMV for debugging.  
 2. Check that your network supports the 2.4 GHz band.  
