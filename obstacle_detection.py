@@ -12,7 +12,7 @@ uart = UART(4, 115200, timeout_char=200)
 OFFSET = 30  # threshold offset around mean background brightness
 min_area = 300       # ignore tiny blobs
 min_pixels = 300     # ignore tiny blobs
-max_fraction = 0.95   # ignore blobs covering more than 90% of image (not working?)
+max_fraction = 0.95  # ignore blobs covering more than 90% of image
 
 # Camera setup
 sensor.reset()
@@ -25,10 +25,12 @@ pixel_size_mm = 1.75e-3
 sensor_px_width = 1616      # active pixel array width
 image_px_width  = 320       # QVGA capture width
 f_mm = 2.2                  # focal length in mm
-f_tuned_mm = 100.0            # tuned focal length, increase value to decrease object width estimates
+f_tuned_mm = 100.0          # tuned focal length,
+                            # increase value to decrease object width estimates
 
 sensor_width_mm = pixel_size_mm * sensor_px_width
-focal_length_px = f_tuned_mm + int((f_mm * image_px_width) / sensor_width_mm) # approx 248 + tuned value
+focal_length_px = f_tuned_mm + int((f_mm * image_px_width) / sensor_width_mm)
+# approx 248 + tuned value
 
 # Distance sensor setup (ToF = time of flight)
 i2c = I2C(2)
@@ -100,7 +102,8 @@ def detect_obstacles():
     color_thresholds = [(0, limit)]
 
     # Find dark blobs
-    blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels, area_threshold=min_area)
+    blobs = img.find_blobs(color_thresholds, pixels_threshold=min_pixels,
+                           area_threshold=min_area)
 
     if blobs and dist > MIN_VALID_DISTANCE and dist < MAX_VALID_DISTANCE:
         # Center of the image (where ToF points)
@@ -115,7 +118,8 @@ def detect_obstacles():
         target = None
         for b in valid_blobs:
             if b.pixels() < (img.width() * img.height() * max_fraction):
-                if b.x() <= center_x <= b.x()+b.w() and b.y() <= center_y <= b.y()+b.h():
+                if b.x() <= center_x <= b.x()+b.w() \
+                and b.y() <= center_y <= b.y()+b.h():
                     target = b
                     break
         if not target:
@@ -136,7 +140,8 @@ def detect_obstacles():
             # Draw target square and distance
             img.draw_cross(target.cx(), target.cy(), color=(0, 255, 0))
             img.draw_rectangle(target.rect(), color=(0, 0, 0), thickness=3)
-            img.draw_string(10, 10, f"Distance: {dist} mm", color=(255, 255, 255),scale=1.5)
+            img.draw_string(10, 10, f"Distance: {dist} mm",
+                            color=(255, 255, 255),scale=1.5)
 
             # Calculate average object offset, width and distance
             return average_offset_width_distance_mm(target,center_x,dist)
@@ -148,11 +153,13 @@ try:
     print("x offset mm, width mm, distance mm")
     while True:
         data = struct.pack('<hhh', *detect_obstacles()) # 2 bytes each
-        #print(*struct.unpack('<hhh', data)) # print values, for testing
+        # print values for testing
+        # print(*struct.unpack('<hhh', data))
         if(uart_request()):
             uart.write(data)
-            #print('Data sent')
-            print(*struct.unpack('<hhh', data)) # print values, for testing
+            # print values, for testing
+            # print('Data sent')
+            print(*struct.unpack('<hhh', data))
         time.sleep_ms(100)
 
 except:

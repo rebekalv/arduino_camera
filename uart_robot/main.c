@@ -112,7 +112,8 @@ int main(void)
 
         // For debugging:
         NRF_LOG_INFO("x_start_mm: %d, x_width_mm: %d, distance_mm: %d", 
-                      estimate.x_start_mm, estimate.x_width_mm, estimate.distance_mm);
+                      estimate.x_start_mm, estimate.x_width_mm, 
+                      estimate.distance_mm);
         NRF_LOG_FLUSH();
         nrf_delay_ms(1000); // delay between requests
     }
